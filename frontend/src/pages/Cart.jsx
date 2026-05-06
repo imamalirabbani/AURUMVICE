@@ -68,7 +68,7 @@ const CartPage = ({ onUpdateCart }) => {
   }
 
   return (
-    <div className="glass" style={{ padding: '2rem', minHeight: '600px' }}>
+    <div style={{ padding: '2rem', minHeight: '600px' }}>
       <div className="cart-header">
         <h1>Your Shopping Cart</h1>
         <span>{cartItems.length} Items</span>
@@ -84,7 +84,7 @@ const CartPage = ({ onUpdateCart }) => {
         <>
           <div className="cart-items">
             {cartItems.map(item => (
-              <div key={item.id} className="cart-item glass" style={{ background: 'rgba(15, 23, 42, 0.4)' }}>
+              <div key={item.id} className="cart-item glass">
                 <img src={getImgUrl(item.image)} alt={item.name} className="cart-item-img" />
                 <div className="cart-item-details">
                   <h3 className="cart-item-title">{item.name}</h3>
@@ -108,7 +108,7 @@ const CartPage = ({ onUpdateCart }) => {
             ))}
           </div>
 
-          <div className="cart-summary glass" style={{ background: 'rgba(15, 23, 42, 0.4)' }}>
+          <div className="cart-summary glass" style={{ background: '#f9fafb' }}>
             <div className="summary-total">
               <span>Total:</span>
               <span className="amount">{formatPrice(total)}</span>

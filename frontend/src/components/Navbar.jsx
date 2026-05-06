@@ -2,28 +2,31 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ShoppingBag, ShoppingCart, Search } from 'lucide-react';
 
-const Navbar = ({ cartCount }) => {
+const Navbar = ({ cartCount, user, onLogout }) => {
   const location = useLocation();
 
   return (
-    <header className="navbar glass">
-      <div className="container">
-        <Link to="/" className="nav-brand">
-          <ShoppingBag size={28} color="#6d28d9" />
-          <span>Lumina</span>Store
+    <header className="navbar-brioni">
+      <div className="navbar-left">
+        <Link to="/" className={`nav-link-brioni ${location.pathname === '/' ? 'active' : ''}`}>COLLECTION</Link>
+        <Link to="/about" className={`nav-link-brioni ${location.pathname === '/about' ? 'active' : ''}`}>OUR STORY</Link>
+      </div>
+
+      <div className="navbar-center">
+        <Link to="/" className="nav-brand-brioni">AURUMVICE</Link>
+      </div>
+
+      <div className="navbar-right">
+        <Link to="/cart" className="nav-link-brioni">
+          BAG {cartCount > 0 && <span>({cartCount})</span>}
         </Link>
-        <nav className="nav-links">
-          <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
-            Home
-          </Link>
-          <Link to="/cart" className={`nav-link ${location.pathname === '/cart' ? 'active' : ''}`}>
-            <div className="cart-icon">
-              <ShoppingCart size={22} />
-              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-            </div>
-            Cart
-          </Link>
-        </nav>
+        {user ? (
+          <>
+            <Link to="/pengaturan" className="nav-link-brioni">PENGATURAN</Link>
+          </>
+        ) : (
+          <Link to="/login" className="nav-link-brioni">LOGIN</Link>
+        )}
       </div>
     </header>
   );

@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import IntroAnimation from './components/IntroAnimation';
 import Home from './pages/Home';
+import About from './pages/About';
 import CartPage from './pages/Cart';
+import ProductDetail from './pages/ProductDetail';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Pengaturan from './pages/Pengaturan';
 import './index.css';
 
 function App() {
   const [cartCount, setCartCount] = useState(0);
+  const [user, setUser] = useState(null);
+  const [showIntro, setShowIntro] = useState(true);
 
   const fetchCart = async () => {
     try {
@@ -21,22 +30,33 @@ function App() {
 
   useEffect(() => {
     fetchCart();
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+  };
 
   return (
     <Router>
-      <div className="bg-blob blob-1"></div>
-      <div className="bg-blob blob-2"></div>
-      <Navbar cartCount={cartCount} />
+      {showIntro && <IntroAnimation onComplete={() => setShowIntro(false)} />}
+      <Navbar cartCount={cartCount} user={user} onLogout={handleLogout} />
       <main className="main-content container">
         <Routes>
-          <Route path="/" element={<Home onAddToCart={fetchCart} />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
           <Route path="/cart" element={<CartPage onUpdateCart={fetchCart} />} />
+          <Route path="/product/:id" element={<ProductDetail onAddToCart={fetchCart} />} />
+          <Route path="/login" element={<Login onLogin={setUser} />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/pengaturan" element={<Pengaturan user={user} onLogout={handleLogout} />} />
         </Routes>
       </main>
-      <footer>
-        <p>&copy; 2026 Web Jual Beli Premium. All rights reserved.</p>
-      </footer>
+      <Footer />
     </Router>
   );
 }
