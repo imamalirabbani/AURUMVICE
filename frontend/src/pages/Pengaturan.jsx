@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+const API_BASE = 'http://localhost:3002';
 
 const Pengaturan = ({ user, onLogout }) => {
     const [products, setProducts] = useState([]);
@@ -15,6 +17,18 @@ const Pengaturan = ({ user, onLogout }) => {
     const [editingProduct, setEditingProduct] = useState(null);
     const navigate = useNavigate();
 
+    const fetchProducts = useCallback(async () => {
+        try {
+            const res = await fetch(`${API_BASE}/api/products`);
+            if (!res.ok) throw new Error('Failed to fetch');
+            const data = await res.json();
+            setProducts(data);
+        } catch (err) {
+            console.error("Failed to fetch products", err);
+            showTemporaryMessage("Error: Failed to fetch products");
+        }
+    }, []);
+
     useEffect(() => {
         if (!user) {
             navigate('/login');
@@ -23,21 +37,28 @@ const Pengaturan = ({ user, onLogout }) => {
         if (user.username === 'admin') {
             fetchProducts();
         }
-    }, [user, navigate]);
+    }, [user, navigate, fetchProducts]);
 
-    const fetchProducts = async () => {
-        try {
-            const res = await fetch('http://localhost:3002/api/products');
-            const data = await res.json();
-            setProducts(data);
-        } catch (err) {
-            console.error("Failed to fetch products", err);
-        }
+    useEffect(() => {
+        // Cleanup object URLs on unmount to prevent memory leaks
+        return () => {
+            imagePreviews.forEach(src => {
+                if (src && src.startsWith('blob:')) {
+                    URL.revokeObjectURL(src);
+                }
+            });
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const showTemporaryMessage = (msg) => {
+        setMessage(msg);
+        setTimeout(() => setMessage(''), 5000);
     };
 
     const formatRupiah = (num) => {
         if (!num) return '';
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return new Intl.NumberFormat('id-ID').format(num);
     };
 
     const handlePriceChange = (e) => {
@@ -49,6 +70,11 @@ const Pengaturan = ({ user, onLogout }) => {
     };
 
     const resetForm = () => {
+        imagePreviews.forEach(src => {
+            if (src && src.startsWith('blob:')) {
+                URL.revokeObjectURL(src);
+            }
+        });
         setName('');
         setDescription('');
         setPrice('');
@@ -60,22 +86,26 @@ const Pengaturan = ({ user, onLogout }) => {
     };
 
     const handleEdit = (product) => {
+        resetForm();
         setEditingProduct(product);
         setName(product.name);
         setDescription(product.description || '');
-        setPrice(product.price.toString().replace('.00', ''));
-        setPriceDisplay(formatRupiah(product.price.toString().replace('.00', '')));
+        const productPrice = product.price.toString().replace('.00', '');
+        setPrice(productPrice);
+        setPriceDisplay(formatRupiah(productPrice));
         setCategory(product.category || '');
         setImageFiles([]);
-        // Show existing images as previews
+        
+        let previews = [];
         if (product.images && product.images.length > 0) {
-            setImagePreviews(product.images.map(img => `http://localhost:3002${img}`));
+            previews = product.images.map(img => `${API_BASE}${img}`);
         } else if (product.image) {
-            setImagePreviews([`http://localhost:3002${product.image}`]);
-        } else {
-            setImagePreviews([]);
+            previews = [`${API_BASE}${product.image}`];
         }
+        setImagePreviews(previews);
+        
         setActiveTab('add');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleSubmit = async (e) => {
@@ -86,34 +116,29 @@ const Pengaturan = ({ user, onLogout }) => {
         formData.append('description', description);
         formData.append('price', price);
         formData.append('category', category);
-        if (imageFiles && imageFiles.length > 0) {
-            for (let i = 0; i < imageFiles.length; i++) {
-                formData.append('imageFiles', imageFiles[i]);
-            }
-        }
+        
+        imageFiles.forEach(file => formData.append('imageFiles', file));
 
         try {
             const url = editingProduct 
-                ? `http://localhost:3002/api/products/${editingProduct.id}`
-                : 'http://localhost:3002/api/products';
+                ? `${API_BASE}/api/products/${editingProduct.id}`
+                : `${API_BASE}/api/products`;
             const method = editingProduct ? 'PUT' : 'POST';
 
-            const res = await fetch(url, {
-                method,
-                body: formData,
-            });
+            const res = await fetch(url, { method, body: formData });
 
             if (res.ok) {
-                setMessage(editingProduct ? 'Product updated successfully!' : 'Product added successfully!');
+                showTemporaryMessage(editingProduct ? 'Product updated successfully!' : 'Product added successfully!');
                 resetForm();
                 fetchProducts();
                 setActiveTab('list');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-                const data = await res.json();
-                setMessage(`Error: ${data.error}`);
+                const data = await res.json().catch(() => ({}));
+                showTemporaryMessage(`Error: ${data.error || 'Operation failed'}`);
             }
         } catch (err) {
-            setMessage(`Error: ${err.message}`);
+            showTemporaryMessage(`Error: ${err.message}`);
         }
     };
 
@@ -121,44 +146,43 @@ const Pengaturan = ({ user, onLogout }) => {
         if (!window.confirm('Are you sure you want to delete this product?')) return;
 
         try {
-            const res = await fetch(`http://localhost:3002/api/products/${id}`, {
-                method: 'DELETE',
-            });
+            const res = await fetch(`${API_BASE}/api/products/${id}`, { method: 'DELETE' });
 
             if (res.ok) {
-                setMessage('Product deleted successfully');
+                showTemporaryMessage('Product deleted successfully');
                 fetchProducts();
             } else {
-                const data = await res.json();
-                setMessage(`Error: ${data.error}`);
+                const data = await res.json().catch(() => ({}));
+                showTemporaryMessage(`Error: ${data.error || 'Failed to delete'}`);
             }
         } catch (err) {
-            setMessage(`Error: ${err.message}`);
+            showTemporaryMessage(`Error: ${err.message}`);
         }
     };
 
     const handleFileChange = (e) => {
-        const newFiles = Array.from(e.target.files);
-        const combined = [...imageFiles, ...newFiles].slice(0, 5);
-        setImageFiles(combined);
+        if (!e.target.files) return;
         
-        // Generate previews for new files and combine with existing
+        const newFiles = Array.from(e.target.files);
+        const combinedFiles = [...imageFiles, ...newFiles].slice(0, 5);
+        setImageFiles(combinedFiles);
+        
         const newPreviews = newFiles.map(file => URL.createObjectURL(file));
         const combinedPreviews = [...imagePreviews, ...newPreviews].slice(0, 5);
         setImagePreviews(combinedPreviews);
         
-        // Reset input so user can select more files
         e.target.value = '';
     };
 
     const removeImage = (index) => {
-        const newFiles = [...imageFiles];
-        newFiles.splice(index, 1);
-        setImageFiles(newFiles);
-        URL.revokeObjectURL(imagePreviews[index]);
-        const newPreviews = [...imagePreviews];
-        newPreviews.splice(index, 1);
-        setImagePreviews(newPreviews);
+        setImageFiles(prev => prev.filter((_, i) => i !== index));
+        
+        const srcToRemove = imagePreviews[index];
+        if (srcToRemove && srcToRemove.startsWith('blob:')) {
+            URL.revokeObjectURL(srcToRemove);
+        }
+        
+        setImagePreviews(prev => prev.filter((_, i) => i !== index));
     };
 
     const handleLogoutClick = () => {
@@ -319,13 +343,13 @@ const Pengaturan = ({ user, onLogout }) => {
                                         <tr key={product.id}>
                                             <td>
                                                 <img 
-                                                    src={product.image ? `http://localhost:3002${product.image}` : 'https://via.placeholder.com/50'} 
+                                                    src={product.image ? `${API_BASE}${product.image}` : 'https://via.placeholder.com/50'} 
                                                     alt={product.name} 
                                                     className="admin-list-img"
                                                 />
                                             </td>
                                             <td>{product.name}</td>
-                                            <td>Rp {parseFloat(product.price).toLocaleString('id-ID')}</td>
+                                            <td>Rp {formatRupiah(product.price)}</td>
                                             <td>
                                                 <button 
                                                     onClick={() => handleEdit(product)}

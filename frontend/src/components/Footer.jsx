@@ -35,6 +35,9 @@ const Footer = () => {
               <Link to="/">Returns</Link>
               <Link to="/">Bespoke Service</Link>
               <Link to="/">Care Guide</Link>
+
+
+              
             </div>
           </div>
         </div>
