@@ -761,17 +761,23 @@ h1, h2, h3, h4, h5, h6 {
 
   /* Hero Section */
   .brioni-hero {
-    height: 80vh;
+    height: 60vh;
+  }
+
+  .brioni-hero-overlay {
+    padding: 4rem 0 !important;
   }
 
   .brioni-hero-title {
-    font-size: 2rem;
-    letter-spacing: 0.4rem;
+    font-size: 1.5rem;
+    letter-spacing: 0.3rem;
   }
 
   .brioni-search-container {
     max-width: 90%;
+    margin-top: 1rem;
   }
+
 
   /* Product Grid Mini (Applies to all mobile) */
   .product-grid {
