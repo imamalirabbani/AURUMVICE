@@ -1,26 +1,48 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle, Download, Printer, Home, ShoppingBag } from 'lucide-react';
+import { CheckCircle, Download, Printer, Home, ShoppingBag, Upload, CreditCard, Truck, MapPin } from 'lucide-react';
 import { api } from '../services/api';
 
 const OrderSuccess = () => {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const fetchOrder = async () => {
+    try {
+      const data = await api.getOrder(id);
+      setOrder(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const data = await api.getOrder(id);
-        setOrder(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchOrder();
   }, [id]);
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleUpload = async () => {
+    if (!file) return alert("Silakan pilih file bukti transfer.");
+    setUploading(true);
+    try {
+      await api.uploadPaymentProof(id, file);
+      alert("Bukti transfer berhasil diunggah! Admin akan segera memverifikasi.");
+      fetchOrder();
+    } catch (err) {
+      console.error(err);
+      alert("Gagal mengunggah bukti transfer.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handlePrint = () => {
     window.print();
@@ -41,7 +63,91 @@ const OrderSuccess = () => {
           <h1>Pesanan Berhasil!</h1>
           <p>Terima kasih atas kepercayaan Anda pada AURUMVICE.</p>
           <div className="order-number">Order ID: #{order.id.toString().padStart(6, '0')}</div>
+          <div className={`payment-status-badge ${order.payment_status.toLowerCase().replace(/\s+/g, '-')}`}>
+            {order.payment_status}
+          </div>
         </div>
+
+        <div className="payment-transfer-section glass no-print">
+          <h3>Informasi Transfer Bank</h3>
+          <div className="bank-info-card">
+            <div className="bank-details">
+              <div className="detail-row">
+                <label>Bank</label>
+                <span>BANK CENTRAL ASIA (BCA)</span>
+              </div>
+              <div className="detail-row">
+                <label>No. Rekening</label>
+                <span className="account-number">8820 991 223</span>
+              </div>
+              <div className="detail-row">
+                <label>Atas Nama</label>
+                <span>PT. AURUMVICE INDONESIA</span>
+              </div>
+              <div className="detail-row">
+                <label>Jumlah Transfer</label>
+                <span className="transfer-amount">{formatPrice(order.total_amount)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="payment-upload-form">
+            <h4>Konfirmasi Pembayaran</h4>
+            <p>Silakan unggah foto struk atau screenshot bukti transfer Anda.</p>
+            
+            {order.payment_proof_url ? (
+              <div className="proof-status-success">
+                <CheckCircle size={20} /> Bukti transfer telah diunggah
+                <a href={order.payment_proof_url} target="_blank" rel="noreferrer" className="btn-link">Lihat Bukti</a>
+              </div>
+            ) : (
+              <div className="upload-controls">
+                <input type="file" onChange={handleFileChange} accept="image/*" id="proof-upload" />
+                <button 
+                  className="btn btn-primary" 
+                  onClick={handleUpload} 
+                  disabled={uploading || !file}
+                >
+                  {uploading ? 'Mengunggah...' : <><Upload size={18} /> Unggah Bukti</>}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {order.tracking_number && (
+          <div className="package-tracking-section glass no-print">
+            <h3>Lacak Paket</h3>
+            <div className="tracking-info-header">
+              <div className="courier-badge">
+                <Truck size={18} /> {order.shipping_courier}
+              </div>
+              <div className="tracking-id">
+                Resi: <strong>{order.tracking_number}</strong>
+              </div>
+            </div>
+
+            <div className="tracking-timeline">
+              {order.tracking_logs && order.tracking_logs.length > 0 ? (
+                order.tracking_logs.map((log, index) => (
+                  <div key={index} className="tracking-step">
+                    <div className="step-marker">
+                      <div className={`dot ${index === 0 ? 'pulse' : ''}`}></div>
+                      {index < order.tracking_logs.length - 1 && <div className="line"></div>}
+                    </div>
+                    <div className="step-content">
+                      <div className="step-time">{new Date(log.created_at).toLocaleString('id-ID', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'})}</div>
+                      <div className="step-status">{log.status_update}</div>
+                      {log.location && <div className="step-location"><MapPin size={12} /> {log.location}</div>}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="notif-empty">Menunggu update dari kurir...</div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="invoice-container printable" id="invoice">
           <div className="invoice-header">

@@ -1,15 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { Package, Truck, CheckCircle, XCircle, Clock, Eye, Printer } from 'lucide-react';
+import { Package, Truck, CheckCircle, XCircle, Clock, Eye, Printer, MapPin, Send } from 'lucide-react';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [trackingInfo, setTrackingInfo] = useState({ tracking_number: '', shipping_courier: 'JNE' });
+  const [newLog, setNewLog] = useState({ status_update: '', location: '' });
 
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  useEffect(() => {
+    if (selectedOrder) {
+      setTrackingInfo({
+        tracking_number: selectedOrder.tracking_number || '',
+        shipping_courier: selectedOrder.shipping_courier || 'JNE'
+      });
+    }
+  }, [selectedOrder]);
 
   const fetchOrders = async () => {
     try {
@@ -33,6 +44,43 @@ const AdminOrders = () => {
     } catch (err) {
       console.error(err);
       alert("Gagal update status");
+    }
+  };
+
+  const handlePaymentStatusUpdate = async (id, newStatus) => {
+    try {
+      await api.updatePaymentStatus(id, newStatus);
+      fetchOrders();
+      if (selectedOrder && selectedOrder.id === id) {
+        const updated = await api.getOrder(id);
+        setSelectedOrder(updated);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Gagal update status pembayaran");
+    }
+  };
+
+  const handleUpdateTrackingInfo = async () => {
+    try {
+      await api.updateTrackingInfo(selectedOrder.id, trackingInfo);
+      alert("Info resi berhasil diperbarui");
+      fetchOrders();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddTrackingLog = async () => {
+    if (!newLog.status_update) return alert("Isi status update");
+    try {
+      await api.addTrackingLog(selectedOrder.id, newLog);
+      setNewLog({ status_update: '', location: '' });
+      const updated = await api.getOrder(selectedOrder.id);
+      setSelectedOrder(updated);
+      fetchOrders();
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -80,9 +128,14 @@ const AdminOrders = () => {
                   <td>{order.client_name}</td>
                   <td>{formatPrice(order.total_amount)}</td>
                   <td>
-                    <span className={`status-badge ${order.status.toLowerCase()}`}>
-                      {getStatusIcon(order.status)} {order.status}
-                    </span>
+                    <div className="status-stack">
+                      <span className={`status-badge ${order.status.toLowerCase()}`}>
+                        {getStatusIcon(order.status)} {order.status}
+                      </span>
+                      <span className={`status-badge mini ${order.payment_status.toLowerCase().replace(/\s+/g, '-')}`}>
+                        {order.payment_status}
+                      </span>
+                    </div>
                   </td>
                   <td>{new Date(order.created_at).toLocaleDateString('id-ID')}</td>
                   <td>
@@ -119,6 +172,82 @@ const AdminOrders = () => {
                     >
                       {s}
                     </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="detail-group">
+                <label>Status Pembayaran</label>
+                <div className="status-updater">
+                  {['Unpaid', 'Pending Verification', 'Paid', 'Failed'].map(s => (
+                    <button 
+                      key={s} 
+                      className={`btn-status mini ${selectedOrder.payment_status === s ? 'active' : ''}`}
+                      onClick={() => handlePaymentStatusUpdate(selectedOrder.id, s)}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {selectedOrder.payment_proof_url && (
+                <div className="detail-group">
+                  <label>Bukti Transfer</label>
+                  <div className="proof-preview">
+                    <img src={selectedOrder.payment_proof_url} alt="Proof of Payment" onClick={() => window.open(selectedOrder.payment_proof_url, '_blank')} />
+                  </div>
+                </div>
+              )}
+
+              <div className="detail-group">
+                <label>Info Resi Pengiriman</label>
+                <div className="tracking-info-form">
+                  <input 
+                    type="text" 
+                    placeholder="Nomor Resi" 
+                    value={trackingInfo.tracking_number}
+                    onChange={(e) => setTrackingInfo({...trackingInfo, tracking_number: e.target.value})}
+                  />
+                  <select 
+                    value={trackingInfo.shipping_courier}
+                    onChange={(e) => setTrackingInfo({...trackingInfo, shipping_courier: e.target.value})}
+                  >
+                    <option value="JNE">JNE</option>
+                    <option value="J&T">J&T</option>
+                    <option value="SiCepat">SiCepat</option>
+                    <option value="Anteraja">Anteraja</option>
+                    <option value="Private Courier">Private Courier</option>
+                  </select>
+                  <button className="btn btn-secondary btn-sm" onClick={handleUpdateTrackingInfo}>Simpan</button>
+                </div>
+              </div>
+
+              <div className="detail-group">
+                <label>Update Lokasi / Status Paket</label>
+                <div className="tracking-log-form">
+                  <input 
+                    type="text" 
+                    placeholder="Status (Contoh: Paket keluar gudang)" 
+                    value={newLog.status_update}
+                    onChange={(e) => setNewLog({...newLog, status_update: e.target.value})}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="Lokasi (Contoh: Jakarta Pusat)" 
+                    value={newLog.location}
+                    onChange={(e) => setNewLog({...newLog, location: e.target.value})}
+                  />
+                  <button className="btn btn-primary btn-sm" onClick={handleAddTrackingLog}><Send size={14} /></button>
+                </div>
+                
+                <div className="mini-timeline">
+                  {selectedOrder.tracking_logs?.map((log, idx) => (
+                    <div key={idx} className="timeline-item">
+                      <div className="time">{new Date(log.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                      <div className="status">{log.status_update}</div>
+                      <div className="loc">{log.location}</div>
+                    </div>
                   ))}
                 </div>
               </div>

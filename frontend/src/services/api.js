@@ -116,5 +116,59 @@ export const api = {
             body: JSON.stringify({ status })
         });
         return handleResponse(res);
+    },
+
+    async uploadPaymentProof(id, file) {
+        const formData = new FormData();
+        formData.append('paymentProof', file);
+        const res = await fetch(`${BASE_URL}/orders/${id}/payment`, {
+            method: 'POST',
+            body: formData
+        });
+        return handleResponse(res);
+    },
+
+    async updatePaymentStatus(id, payment_status) {
+        const res = await fetch(`${BASE_URL}/orders/${id}/payment-status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ payment_status })
+        });
+        return handleResponse(res);
+    },
+
+    // Notifications
+    async getNotifications(userId) {
+        const res = await fetch(`${BASE_URL}/notifications/${userId}`);
+        return handleResponse(res);
+    },
+
+    async markAsRead(id) {
+        const res = await fetch(`${BASE_URL}/notifications/${id}/read`, { method: 'PUT' });
+        return handleResponse(res);
+    },
+
+    async markAllAsRead(userId) {
+        const res = await fetch(`${BASE_URL}/notifications/read-all/${userId}`, { method: 'PUT' });
+        return handleResponse(res);
+    },
+
+    // Tracking
+    async addTrackingLog(id, logData) {
+        const res = await fetch(`${BASE_URL}/orders/${id}/tracking`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(logData)
+        });
+        return handleResponse(res);
+    },
+
+    async updateTrackingInfo(id, trackingData) {
+        const res = await fetch(`${BASE_URL}/orders/${id}/tracking-info`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(trackingData)
+        });
+        return handleResponse(res);
     }
 };

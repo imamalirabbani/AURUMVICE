@@ -29,6 +29,20 @@ const catchAsync = (fn) => (req, res, next) => {
     fn(req, res, next).catch(next);
 };
 
+// Helper to create notifications
+const createNotification = async (userId, message, type = 'info') => {
+    try {
+        const pool = await getPool();
+        await pool.query(
+            "INSERT INTO notifications (user_id, message, type) VALUES ($1, $2, $3)",
+            [userId, message, type]
+        );
+        console.log(`Notification created for User ${userId}: ${message}`);
+    } catch (err) {
+        console.error("Failed to create notification:", err);
+    }
+};
+
 // --- Routes ---
 
 // Get all products
@@ -314,6 +328,9 @@ app.post('/api/orders', catchAsync(async (req, res) => {
     // but here we just clear the global cart for simplicity as the current system doesn't have multi-user cart isolation yet)
     await pool.query("DELETE FROM cart");
 
+    // 4. Create notification for admin (using user_id null or 1 as admin for now)
+    await createNotification(1, `Pesanan baru #${orderId} dari ${client_name}`, 'order');
+
     res.status(201).json({ id: orderId, message: "Order placed successfully" });
 }));
 
@@ -350,15 +367,136 @@ app.get('/api/orders/:id', catchAsync(async (req, res) => {
         WHERE oi.order_id = $1
     `, [req.params.id]);
 
-    res.json({ ...orders[0], items });
+    const { rows: trackingLogs } = await pool.query("SELECT * FROM tracking_logs WHERE order_id = $1 ORDER BY created_at DESC", [req.params.id]);
+
+    res.json({ ...orders[0], items, tracking_logs: trackingLogs });
 }));
 
 // Update order status (Admin)
 app.put('/api/orders/:id/status', catchAsync(async (req, res) => {
     const pool = await getPool();
     const { status } = req.body;
-    await pool.query("UPDATE orders SET status = $1 WHERE id = $2", [status, req.params.id]);
+    const { rows: orders } = await pool.query("UPDATE orders SET status = $1 WHERE id = $2 RETURNING user_id", [status, req.params.id]);
+    
+    if (orders.length > 0 && orders[0].user_id) {
+        await createNotification(orders[0].user_id, `Status pesanan #${req.params.id} Anda diperbarui menjadi: ${status}`, 'order_status');
+    }
+
     res.json({ message: "Order status updated" });
+}));
+
+// Upload Payment Proof
+app.post('/api/orders/:id/payment', upload.single('paymentProof'), catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const orderId = req.params.id;
+    
+    if (!req.file) {
+        return res.status(400).json({ error: "No payment proof uploaded" });
+    }
+
+    // Upload to Supabase Storage
+    const fileExt = path.extname(req.file.originalname);
+    const fileName = `proof-${orderId}-${Date.now()}${fileExt}`;
+    const filePath = `payments/${fileName}`;
+
+    const { data, error } = await supabase.storage
+        .from('product-images') // Re-using the same bucket for simplicity, or create a new one 'payments'
+        .upload(filePath, req.file.buffer, {
+            contentType: req.file.mimetype,
+            upsert: true
+        });
+
+    if (error) {
+        console.error('Supabase upload error:', error);
+        throw new Error(`Upload failed: ${error.message}`);
+    }
+
+    const { data: publicUrlData } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+    
+    const proofUrl = publicUrlData.publicUrl;
+
+    // Update database
+    await pool.query(
+        "UPDATE orders SET payment_status = $1, payment_proof_url = $2 WHERE id = $3",
+        ['Pending Verification', proofUrl, orderId]
+    );
+
+    // Notification for admin
+    await createNotification(1, `Bukti pembayaran baru diunggah untuk Pesanan #${orderId}`, 'payment');
+
+    res.json({ message: "Payment proof uploaded successfully", proofUrl });
+}));
+
+// Update Payment Status (Admin)
+app.put('/api/orders/:id/payment-status', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { payment_status } = req.body;
+    const { rows: orders } = await pool.query("UPDATE orders SET payment_status = $1 WHERE id = $2 RETURNING user_id", [payment_status, req.params.id]);
+    
+    if (orders.length > 0 && orders[0].user_id) {
+        await createNotification(orders[0].user_id, `Pembayaran pesanan #${req.params.id} Anda: ${payment_status}`, 'payment_status');
+    }
+
+    res.json({ message: "Payment status updated" });
+}));
+
+
+// --- Tracking Routes ---
+
+app.post('/api/orders/:id/tracking', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { status_update, location } = req.body;
+    const orderId = req.params.id;
+
+    await pool.query(
+        "INSERT INTO tracking_logs (order_id, status_update, location) VALUES ($1, $2, $3)",
+        [orderId, status_update, location]
+    );
+
+    // Auto-update order status to 'Dikirim' if it's the first update and was 'Diproses'
+    const { rows: orders } = await pool.query("SELECT status, user_id FROM orders WHERE id = $1", [orderId]);
+    if (orders[0].status === 'Diproses') {
+        await pool.query("UPDATE orders SET status = 'Dikirim' WHERE id = $1", [orderId]);
+    }
+
+    if (orders[0].user_id) {
+        await createNotification(orders[0].user_id, `Update Pengiriman #${orderId}: ${status_update} (${location || 'Transit'})`, 'tracking');
+    }
+
+    res.status(201).json({ message: "Tracking log added" });
+}));
+
+app.put('/api/orders/:id/tracking-info', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { tracking_number, shipping_courier } = req.body;
+    await pool.query(
+        "UPDATE orders SET tracking_number = $1, shipping_courier = $2 WHERE id = $3",
+        [tracking_number, shipping_courier, req.params.id]
+    );
+    res.json({ message: "Tracking info updated" });
+}));
+
+
+// --- Notification Routes ---
+
+app.get('/api/notifications/:userId', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { rows } = await pool.query("SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50", [req.params.userId]);
+    res.json(rows);
+}));
+
+app.put('/api/notifications/:id/read', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    await pool.query("UPDATE notifications SET is_read = TRUE WHERE id = $1", [req.params.id]);
+    res.json({ message: "Notification marked as read" });
+}));
+
+app.put('/api/notifications/read-all/:userId', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    await pool.query("UPDATE notifications SET is_read = TRUE WHERE user_id = $1", [req.params.userId]);
+    res.json({ message: "All notifications marked as read" });
 }));
 
 

@@ -73,6 +73,10 @@ async function initDatabase() {
         payment_method VARCHAR(50),
         total_amount NUMERIC(15,2),
         status VARCHAR(20) DEFAULT 'Pending',
+        payment_status VARCHAR(20) DEFAULT 'Unpaid',
+        payment_proof_url TEXT,
+        tracking_number VARCHAR(100),
+        shipping_courier VARCHAR(50),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
 
@@ -83,6 +87,25 @@ async function initDatabase() {
         product_id INT REFERENCES products(id),
         quantity INT,
         price_at_purchase NUMERIC(15,2)
+    )`);
+
+    // Tracking Logs Table
+    await p.query(`CREATE TABLE IF NOT EXISTS tracking_logs (
+        id SERIAL PRIMARY KEY,
+        order_id INT REFERENCES orders(id) ON DELETE CASCADE,
+        status_update TEXT NOT NULL,
+        location VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Notifications Table
+    await p.query(`CREATE TABLE IF NOT EXISTS notifications (
+        id SERIAL PRIMARY KEY,
+        user_id INT REFERENCES users(id),
+        message TEXT NOT NULL,
+        type VARCHAR(50),
+        is_read BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
 
     // About Content Table
