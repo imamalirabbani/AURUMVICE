@@ -11,6 +11,7 @@ import ProductDetail from './pages/ProductDetail';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Pengaturan from './pages/Pengaturan';
+import { api } from './services/api';
 import './index.css';
 
 function App() {
@@ -20,8 +21,7 @@ function App() {
 
   const fetchCart = async () => {
     try {
-      const res = await fetch('http://localhost:3002/api/cart');
-      const data = await res.json();
+      const data = await api.getCart();
       const count = data.reduce((acc, item) => acc + item.quantity, 0);
       setCartCount(count);
     } catch (err) {
@@ -36,6 +36,7 @@ function App() {
       setUser(JSON.parse(savedUser));
     }
   }, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem('user');

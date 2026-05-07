@@ -210,6 +210,7 @@ h1, h2, h3, h4, h5, h6 {
   height: 100%;
   object-fit: cover;
   z-index: 1;
+  filter: brightness(0.6);
 }
 
 .brioni-hero-overlay {
@@ -252,31 +253,24 @@ h1, h2, h3, h4, h5, h6 {
   color: white;
 }
 
+.brioni-search-container {
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 400px;
+}
 
-
-
-
-@media (max-width: 900px) {
-  .editorial-hero {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-  .editorial-title {
-    font-size: 3.5rem;
-  }
-  .editorial-image-wrapper {
-    height: 50vh;
-    min-height: 400px;
-  }
-
+.hero-search-input {
+  color: white !important;
+  border-bottom: 1px solid rgba(255,255,255,0.5) !important;
+  font-size: 0.9rem !important;
 }
 
 .search-minimal {
   max-width: 400px;
   margin: 0 auto;
   position: relative;
-  border-bottom: 1px solid var(--border-color);
 }
+
 
 .search-input {
   width: 100%;
@@ -726,6 +720,191 @@ h1, h2, h3, h4, h5, h6 {
 
 .value-card p {
   color: var(--text-secondary);
+}
+
+/* --- RESPONSIVE DESIGN --- */
+
+@media (max-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .detail-grid {
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Global */
+  body {
+    font-size: 14px;
+  }
+
+  .container {
+    padding: 0 1.5rem;
+  }
+
+  /* Navbar */
+  .nav-container {
+    padding: 1rem 1.5rem;
+  }
+
+  .nav-links {
+    display: none; /* Hide standard links on mobile, ideally replace with hamburger */
+  }
+
+  /* Hero Section */
+  .brioni-hero {
+    height: 80vh;
+  }
+
+  .brioni-hero-title {
+    font-size: 2rem;
+    letter-spacing: 0.4rem;
+  }
+
+  .brioni-search-container {
+    max-width: 90%;
+  }
+
+  /* Product Grid */
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .collection-header h2 {
+    font-size: 1.5rem;
+  }
+
+  /* Product Detail */
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .main-image-container {
+    height: 50vh;
+  }
+
+  .detail-title {
+    font-size: 1.8rem;
+  }
+
+  .detail-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .detail-actions button {
+    width: 100%;
+  }
+
+  .quantity-selector {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Cart Page */
+  .cart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-item {
+    grid-template-columns: 80px 1fr auto;
+    gap: 1rem;
+    padding: 1rem 0;
+  }
+
+  .cart-item img {
+    width: 80px;
+    height: 100px;
+  }
+
+  .cart-summary {
+    position: static;
+    margin-top: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .brioni-hero-title {
+    font-size: 1.5rem;
+    letter-spacing: 0.3rem;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(1, 1fr); /* Optional: single column for very small devices */
+  }
+  
+  .btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Mobile Menu Button & Side Panel */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  z-index: 1100;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: block;
+    position: absolute;
+    left: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  .navbar-left {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 80%;
+    max-width: 300px;
+    height: 100vh;
+    background: white;
+    z-index: 1050;
+    flex-direction: column;
+    padding: 6rem 2rem;
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+    display: flex; /* Ensure it's flex but hidden off-screen */
+  }
+
+  .navbar-left.mobile-open {
+    left: 0;
+  }
+
+  .navbar-left .nav-link-brioni {
+    font-size: 1.1rem;
+    padding: 1.2rem 0;
+    width: 100%;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+    margin: 0;
+  }
+
+  .mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+    z-index: 1040;
+  }
 }
 
 @media (max-width: 768px) {

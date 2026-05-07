@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ShoppingCart, ArrowLeft, Star, Shield, Truck, RefreshCw } from 'lucide-react';
+import { api } from '../services/api';
 
 const ProductDetail = ({ onAddToCart }) => {
   const { id } = useParams();
@@ -12,24 +13,22 @@ const ProductDetail = ({ onAddToCart }) => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const data = await api.getProduct(id);
+        setProduct(data);
+      } catch (err) {
+        console.error("Failed to fetch product:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchProduct();
   }, [id]);
 
-  const fetchProduct = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`http://localhost:3002/api/products/${id}`);
-      const data = await res.json();
-      setProduct(data);
-    } catch (err) {
-      console.error("Failed to fetch product:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const getImgUrl = (url) => {
-    if (!url) return 'https://via.placeholder.com/800x600?text=No+Image';
+    if (!url) return 'https://via.placeholder.com/800x1000?text=AURUMVICE+Collection';
     if (url.startsWith('http')) return url;
     return `http://localhost:3002${url}`;
   };
@@ -40,22 +39,22 @@ const ProductDetail = ({ onAddToCart }) => {
 
   const handleAddToCart = async (isBuyNow = false) => {
     try {
-      await fetch('http://localhost:3002/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: product.id, quantity: quantity })
-      });
+      await api.addToCart(product.id, quantity);
       onAddToCart();
       if (isBuyNow) navigate('/cart');
     } catch (err) {
       console.error(err);
+      alert("Failed to add to cart");
     }
   };
 
   if (loading) return <div className="empty-state">Loading product details...</div>;
   if (!product) return <div className="empty-state">Product not found.</div>;
 
-  const images = product.images && product.images.length > 0 ? product.images : [product.image];
+  // Consolidate images: main image + gallery images
+  const allImages = product.images && product.images.length > 0 
+    ? product.images 
+    : [product.image];
 
   return (
     <div className="product-detail-page">
@@ -66,17 +65,30 @@ const ProductDetail = ({ onAddToCart }) => {
       <div className="detail-grid">
         <div className="detail-gallery">
           <div className="main-image-container">
-            <img src={getImgUrl(images[activeImage])} alt={product.name} className="detail-image" />
+            <img 
+              src={getImgUrl(allImages[activeImage])} 
+              alt={product.name} 
+              className="detail-image"
+              onError={(e) => {
+                e.target.src = 'https://via.placeholder.com/800x1000?text=Image+Unavailable';
+              }} 
+            />
           </div>
-          {images.length > 1 && (
+          {allImages.length > 1 && (
             <div className="thumbnail-strip">
-              {images.map((img, index) => (
+              {allImages.map((img, index) => (
                 <div 
                   key={index} 
                   className={`thumbnail-item ${activeImage === index ? 'active' : ''}`}
                   onClick={() => setActiveImage(index)}
                 >
-                  <img src={getImgUrl(img)} alt={`${product.name} ${index + 1}`} />
+                  <img 
+                    src={getImgUrl(img)} 
+                    alt={`${product.name} thumbnail ${index + 1}`} 
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/100x125?text=NA';
+                    }}
+                  />
                 </div>
               ))}
             </div>
@@ -84,7 +96,7 @@ const ProductDetail = ({ onAddToCart }) => {
         </div>
 
         <div className="detail-info">
-          <span className="product-category">{product.category}</span>
+          <span className="product-category-luxury">{product.category?.toUpperCase()}</span>
           <h1 className="detail-title">{product.name}</h1>
           
           <div className="detail-price">{formatPrice(product.price)}</div>
@@ -136,3 +148,4 @@ const ProductDetail = ({ onAddToCart }) => {
 };
 
 export default ProductDetail;
+
