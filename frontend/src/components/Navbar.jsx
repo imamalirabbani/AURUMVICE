@@ -46,6 +46,7 @@ const Navbar = ({ cartCount, user }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const isHideLinks = location.pathname.toLowerCase().includes('/admin');
 
   return (
     <header className="navbar-brioni">
@@ -58,10 +59,10 @@ const Navbar = ({ cartCount, user }) => {
         <Link to="/about" onClick={() => setIsMenuOpen(false)} className={`nav-link-brioni ${location.pathname === '/about' ? 'active' : ''}`}>OUR STORY</Link>
         {isMenuOpen && (
           <>
-            {!location.pathname.startsWith('/admin') && (
+            {!isHideLinks && (
               <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">BAG ({cartCount})</Link>
             )}
-            {!location.pathname.startsWith('/admin') && user && (
+            {!isHideLinks && user && (
               <Link to="/my-orders" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PESANAN SAYA</Link>
             )}
             {user ? (
@@ -108,11 +109,11 @@ const Navbar = ({ cartCount, user }) => {
           </div>
         )}
 
-        {!location.pathname.startsWith('/admin') && user && (
+        {!isHideLinks && user && (
           <Link to="/my-orders" className="nav-link-brioni desktop-only">PESANAN SAYA</Link>
         )}
 
-        {!location.pathname.startsWith('/admin') && (
+        {!isHideLinks && (
           <Link to="/cart" className="nav-link-brioni">
             BAG {cartCount > 0 && <span>({cartCount})</span>}
           </Link>
