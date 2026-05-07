@@ -15,6 +15,11 @@ const Pengaturan = ({ user, onLogout }) => {
     const [imagePreviews, setImagePreviews] = useState([]);
     const [message, setMessage] = useState('');
     const [editingProduct, setEditingProduct] = useState(null);
+    const [aboutContent, setAboutContent] = useState({
+        excellence: { title: 'Excellence', description: '' },
+        integrity: { title: 'Integrity', description: '' },
+        innovation: { title: 'Innovation', description: '' }
+    });
     const navigate = useNavigate();
 
     const fetchProducts = useCallback(async () => {
@@ -29,6 +34,19 @@ const Pengaturan = ({ user, onLogout }) => {
         }
     }, []);
 
+    const fetchAboutContent = useCallback(async () => {
+        try {
+            const res = await fetch(`${API_BASE}/api/about`);
+            if (!res.ok) throw new Error('Failed to fetch about content');
+            const data = await res.json();
+            if (data && Object.keys(data).length > 0) {
+                setAboutContent(prev => ({ ...prev, ...data }));
+            }
+        } catch (err) {
+            console.error("Failed to fetch about content", err);
+        }
+    }, []);
+
     useEffect(() => {
         if (!user) {
             navigate('/login');
@@ -36,6 +54,7 @@ const Pengaturan = ({ user, onLogout }) => {
         }
         if (user.username === 'admin') {
             fetchProducts();
+            fetchAboutContent();
         }
     }, [user, navigate, fetchProducts]);
 
@@ -142,6 +161,26 @@ const Pengaturan = ({ user, onLogout }) => {
         }
     };
 
+    const handleAboutSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await fetch(`${API_BASE}/api/about`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(aboutContent)
+            });
+
+            if (res.ok) {
+                showTemporaryMessage('About content updated successfully!');
+            } else {
+                const data = await res.json().catch(() => ({}));
+                showTemporaryMessage(`Error: ${data.error || 'Operation failed'}`);
+            }
+        } catch (err) {
+            showTemporaryMessage(`Error: ${err.message}`);
+        }
+    };
+
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this product?')) return;
 
@@ -209,6 +248,12 @@ const Pengaturan = ({ user, onLogout }) => {
                         >
                             {editingProduct ? 'EDIT PRODUK' : 'TAMBAH PRODUK'}
                         </button>
+                        <button 
+                            className={`tab-btn ${activeTab === 'about' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('about')}
+                        >
+                            ABOUT PAGE
+                        </button>
                     </>
                 )}
                 <button 
@@ -235,6 +280,82 @@ const Pengaturan = ({ user, onLogout }) => {
                     >
                         LOGOUT
                     </button>
+                </section>
+            )}
+
+            {user?.username === 'admin' && activeTab === 'about' && (
+                <section className="admin-section fade-in">
+                    <form onSubmit={handleAboutSubmit} className="admin-form">
+                        <div style={{ marginBottom: '2rem' }}>
+                            <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>Excellence Section</h3>
+                            <div className="form-group">
+                                <label>Title</label>
+                                <input 
+                                    type="text" 
+                                    value={aboutContent.excellence?.title || ''} 
+                                    onChange={(e) => setAboutContent({...aboutContent, excellence: {...aboutContent.excellence, title: e.target.value}})} 
+                                    required 
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Description</label>
+                                <textarea 
+                                    value={aboutContent.excellence?.description || ''} 
+                                    onChange={(e) => setAboutContent({...aboutContent, excellence: {...aboutContent.excellence, description: e.target.value}})} 
+                                    required 
+                                    rows="3"
+                                />
+                            </div>
+                        </div>
+
+                        <div style={{ marginBottom: '2rem' }}>
+                            <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>Integrity Section</h3>
+                            <div className="form-group">
+                                <label>Title</label>
+                                <input 
+                                    type="text" 
+                                    value={aboutContent.integrity?.title || ''} 
+                                    onChange={(e) => setAboutContent({...aboutContent, integrity: {...aboutContent.integrity, title: e.target.value}})} 
+                                    required 
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Description</label>
+                                <textarea 
+                                    value={aboutContent.integrity?.description || ''} 
+                                    onChange={(e) => setAboutContent({...aboutContent, integrity: {...aboutContent.integrity, description: e.target.value}})} 
+                                    required 
+                                    rows="3"
+                                />
+                            </div>
+                        </div>
+
+                        <div style={{ marginBottom: '2rem' }}>
+                            <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>Innovation Section</h3>
+                            <div className="form-group">
+                                <label>Title</label>
+                                <input 
+                                    type="text" 
+                                    value={aboutContent.innovation?.title || ''} 
+                                    onChange={(e) => setAboutContent({...aboutContent, innovation: {...aboutContent.innovation, title: e.target.value}})} 
+                                    required 
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Description</label>
+                                <textarea 
+                                    value={aboutContent.innovation?.description || ''} 
+                                    onChange={(e) => setAboutContent({...aboutContent, innovation: {...aboutContent.innovation, description: e.target.value}})} 
+                                    required 
+                                    rows="3"
+                                />
+                            </div>
+                        </div>
+
+                        <button type="submit" className="admin-submit-btn">
+                            Update About Content
+                        </button>
+                    </form>
                 </section>
             )}
 

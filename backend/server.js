@@ -93,6 +93,22 @@ async function setupDatabase() {
             FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE
         )`);
 
+        await pool.query(`CREATE TABLE IF NOT EXISTS about_content (
+            section_key VARCHAR(50) PRIMARY KEY,
+            title VARCHAR(255),
+            description TEXT
+        )`);
+
+        // Insert default about content if empty
+        const [aboutRows] = await pool.query("SELECT * FROM about_content");
+        if (aboutRows.length === 0) {
+            await pool.query(`INSERT INTO about_content (section_key, title, description) VALUES 
+                ('excellence', 'Excellence', 'We settle for nothing less than the best in every product we offer.'),
+                ('integrity', 'Integrity', 'Transparency and trust are the foundations of our relationship with you.'),
+                ('innovation', 'Innovation', 'Constantly seeking new ways to enhance your shopping experience.')
+            `);
+        }
+
     } catch (err) {
         console.error('Error setting up database:', err);
     }
@@ -307,6 +323,35 @@ app.post('/api/login', async (req, res) => {
             return res.status(401).json({ error: "Invalid credentials" });
         }
         res.json({ message: "Login successful", user: rows[0] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// About Content Routes
+app.get('/api/about', async (req, res) => {
+    try {
+        const [rows] = await pool.query("SELECT * FROM about_content");
+        const contentMap = {};
+        rows.forEach(row => {
+            contentMap[row.section_key] = { title: row.title, description: row.description };
+        });
+        res.json(contentMap);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/about', async (req, res) => {
+    try {
+        const contentData = req.body; // Expecting { excellence: { title, description }, ... }
+        for (const [key, data] of Object.entries(contentData)) {
+            await pool.query(
+                "UPDATE about_content SET title = ?, description = ? WHERE section_key = ?",
+                [data.title, data.description, key]
+            );
+        }
+        res.json({ message: "About content updated successfully" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

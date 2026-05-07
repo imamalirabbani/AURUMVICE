@@ -4,9 +4,24 @@ import { Award, ShieldCheck, Zap } from 'lucide-react';
 
 const About = () => {
   const navigate = useNavigate();
+  const [aboutContent, setAboutContent] = React.useState({
+    excellence: { title: 'Excellence', description: 'We settle for nothing less than the best in every product we offer.' },
+    integrity: { title: 'Integrity', description: 'Transparency and trust are the foundations of our relationship with you.' },
+    innovation: { title: 'Innovation', description: 'Constantly seeking new ways to enhance your shopping experience.' }
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    
+    // Fetch about content from backend
+    fetch('http://localhost:3002/api/about')
+      .then(res => res.json())
+      .then(data => {
+        if (data && Object.keys(data).length > 0) {
+          setAboutContent(prev => ({ ...prev, ...data }));
+        }
+      })
+      .catch(err => console.error("Failed to fetch about content:", err));
   }, []);
 
   return (
@@ -40,18 +55,18 @@ const About = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4rem', textAlign: 'center' }}>
             <div>
               <Award size={24} color="#000" style={{ marginBottom: '1.5rem' }} />
-              <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.1rem', textTransform: 'uppercase', marginBottom: '1rem' }}>Excellence</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.8' }}>We settle for nothing less than the best in every product we offer.</p>
+              <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.1rem', textTransform: 'uppercase', marginBottom: '1rem' }}>{aboutContent.excellence.title}</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.8' }}>{aboutContent.excellence.description}</p>
             </div>
             <div>
               <ShieldCheck size={24} color="#000" style={{ marginBottom: '1.5rem' }} />
-              <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.1rem', textTransform: 'uppercase', marginBottom: '1rem' }}>Integrity</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.8' }}>Transparency and trust are the foundations of our relationship with you.</p>
+              <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.1rem', textTransform: 'uppercase', marginBottom: '1rem' }}>{aboutContent.integrity.title}</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.8' }}>{aboutContent.integrity.description}</p>
             </div>
             <div>
               <Zap size={24} color="#000" style={{ marginBottom: '1.5rem' }} />
-              <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.1rem', textTransform: 'uppercase', marginBottom: '1rem' }}>Innovation</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.8' }}>Constantly seeking new ways to enhance your shopping experience.</p>
+              <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.1rem', textTransform: 'uppercase', marginBottom: '1rem' }}>{aboutContent.innovation.title}</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.8' }}>{aboutContent.innovation.description}</p>
             </div>
           </div>
         </section>

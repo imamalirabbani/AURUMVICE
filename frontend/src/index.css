@@ -1,14 +1,14 @@
 :root {
   --primary-color: #000000;
   --primary-hover: #1a1a1a;
-  --accent-gold: #555555;
-  --accent-gold-light: #777777;
-  --bg-color: #ffffff;
-  --card-bg: #ffffff;
-  --text-primary: #000000;
-  --text-secondary: #666666;
-  --border-color: #e5e5e5;
-  --luxury-shadow: none;
+  --accent-gold: #C5A059;
+  --accent-gold-light: #DFB972;
+  --bg-color: #FAFAFA;
+  --card-bg: #FFFFFF;
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --border-color: #E0E0E0;
+  --luxury-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   --header-font: 'Playfair Display', serif;
   --body-font: 'Inter', sans-serif;
 }
@@ -179,7 +179,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-link-brioni:hover, .nav-link-brioni.active {
-  color: var(--text-primary);
+  color: var(--accent-gold);
 }
 
 /* Layouts */
@@ -237,8 +237,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .brioni-hero-btn {
-  background: white;
-  color: black;
+  background: transparent;
+  color: white;
   border: 1px solid white;
   padding: 1rem 3rem;
   font-size: 0.8rem;
@@ -247,7 +247,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .brioni-hero-btn:hover {
-  background: transparent;
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
   color: white;
 }
 
@@ -358,10 +359,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .product-overlay span {
-  color: var(--primary-color);
+  color: white;
   font-size: 0.7rem;
   letter-spacing: 0.2rem;
-  background: white;
+  background: var(--accent-gold);
   padding: 15px 30px;
   transform: translateY(20px);
   transition: all 0.6s cubic-bezier(0.2, 0, 0.2, 1);
