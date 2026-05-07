@@ -583,9 +583,6 @@ app.use((err, req, res, next) => {
     });
 });
 
-    });
-});
-
 // Initialize and Start
 if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
     initDatabase().then(() => {
