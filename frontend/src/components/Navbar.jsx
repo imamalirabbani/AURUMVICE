@@ -11,7 +11,7 @@ const Navbar = ({ cartCount, user, onLogout }) => {
   return (
     <header className="navbar-brioni">
       <button className="mobile-menu-btn" onClick={toggleMenu}>
-        {isMenuOpen ? <X /> : <Menu />}
+        {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
       <div className={`navbar-left ${isMenuOpen ? 'mobile-open' : ''}`}>

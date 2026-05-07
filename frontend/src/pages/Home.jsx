@@ -50,7 +50,7 @@ const Home = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <Search className="search-icon-luxury" />
+              <Search size={18} className="search-icon-luxury" />
             </div>
           </div>
 
