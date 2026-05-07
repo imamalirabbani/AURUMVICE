@@ -1619,7 +1619,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 1s ease;
+  transition: opacity 0.8s ease;
 }
 
 .intro-animation-white.exit {
@@ -1639,7 +1639,7 @@ h1, h2, h3, h4, h5, h6 {
   height: 140px;
   opacity: 0;
   transform: scale(0.9);
-  transition: all 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .intro-animation-white.reveal .intro-av-logo,
@@ -1661,7 +1661,7 @@ h1, h2, h3, h4, h5, h6 {
   color: #1a1a1a;
   opacity: 0;
   transform: translateY(15px);
-  transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .intro-animation-white.text .intro-white-brand,
@@ -1674,7 +1674,7 @@ h1, h2, h3, h4, h5, h6 {
   width: 0;
   height: 1px;
   background: #1a1a1a;
-  transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
 }
 
 .intro-animation-white.text .intro-white-line,

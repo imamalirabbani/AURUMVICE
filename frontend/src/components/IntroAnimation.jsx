@@ -5,10 +5,10 @@ const IntroAnimation = ({ onComplete }) => {
 
   useEffect(() => {
     const timers = [];
-    timers.push(setTimeout(() => setPhase('reveal'), 200));
-    timers.push(setTimeout(() => setPhase('text'), 1800));
-    timers.push(setTimeout(() => setPhase('exit'), 3500));
-    timers.push(setTimeout(() => onComplete(), 4500));
+    timers.push(setTimeout(() => setPhase('reveal'), 150));
+    timers.push(setTimeout(() => setPhase('text'), 1200));
+    timers.push(setTimeout(() => setPhase('exit'), 2500));
+    timers.push(setTimeout(() => onComplete(), 3200));
     return () => timers.forEach(clearTimeout);
   }, [onComplete]);
 
