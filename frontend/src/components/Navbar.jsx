@@ -61,7 +61,7 @@ const Navbar = ({ cartCount, user }) => {
             {!location.pathname.startsWith('/admin') && (
               <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">BAG ({cartCount})</Link>
             )}
-            {user && (
+            {!location.pathname.startsWith('/admin') && user && (
               <Link to="/my-orders" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PESANAN SAYA</Link>
             )}
             {user ? (
@@ -108,7 +108,7 @@ const Navbar = ({ cartCount, user }) => {
           </div>
         )}
 
-        {user && (
+        {!location.pathname.startsWith('/admin') && user && (
           <Link to="/my-orders" className="nav-link-brioni desktop-only">PESANAN SAYA</Link>
         )}
 
