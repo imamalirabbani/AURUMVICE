@@ -7,9 +7,13 @@ const Navbar = ({ cartCount, user }) => {
   const location = useLocation();
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Aggressive check: if 'admin' appears anywhere in the URL path
+  const isAdminPath = /admin/i.test(location.pathname);
 
   useEffect(() => {
-    if (user) {
+    if (user && !isAdminPath) {
       const fetchNotifications = async () => {
         try {
           const data = await api.getNotifications(user.id);
@@ -19,10 +23,10 @@ const Navbar = ({ cartCount, user }) => {
         }
       };
       fetchNotifications();
-      const interval = setInterval(fetchNotifications, 30000); // Polling every 30s
+      const interval = setInterval(fetchNotifications, 30000);
       return () => clearInterval(interval);
     }
-  }, [user]);
+  }, [user, isAdminPath]);
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
@@ -43,13 +47,11 @@ const Navbar = ({ cartCount, user }) => {
       console.error(err);
     }
   };
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const isHideLinks = location.pathname.toLowerCase().includes('/admin');
 
   return (
-    <header className="navbar-brioni">
+    <header className="navbar-brioni" data-admin={isAdminPath}>
       <button className="mobile-menu-btn" onClick={toggleMenu}>
         {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
@@ -57,10 +59,11 @@ const Navbar = ({ cartCount, user }) => {
       <div className={`navbar-left ${isMenuOpen ? 'mobile-open' : ''}`}>
         <Link to="/" onClick={() => setIsMenuOpen(false)} className={`nav-link-brioni ${location.pathname === '/' ? 'active' : ''}`}>COLLECTION</Link>
         <Link to="/about" onClick={() => setIsMenuOpen(false)} className={`nav-link-brioni ${location.pathname === '/about' ? 'active' : ''}`}>OUR STORY</Link>
+        
         {isMenuOpen && (
           <div className="mobile-nav-links">
-            {isHideLinks ? (
-              /* ADMIN MOBILE VIEW */
+            {isAdminPath ? (
+              /* ADMIN MOBILE */
               <>
                 {user ? (
                   <Link to="/pengaturan" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PENGATURAN</Link>
@@ -69,7 +72,7 @@ const Navbar = ({ cartCount, user }) => {
                 )}
               </>
             ) : (
-              /* CLIENT MOBILE VIEW */
+              /* CLIENT MOBILE */
               <>
                 <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">BAG ({cartCount})</Link>
                 {user && (
@@ -91,8 +94,8 @@ const Navbar = ({ cartCount, user }) => {
       </div>
 
       <div className="navbar-right desktop-only">
-        {isHideLinks ? (
-          /* ADMIN VIEW: No Bag, No My Orders */
+        {isAdminPath ? (
+          /* ADMIN DESKTOP */
           <>
             {user ? (
               <Link to="/pengaturan" className="nav-link-brioni">PENGATURAN</Link>
@@ -101,7 +104,7 @@ const Navbar = ({ cartCount, user }) => {
             )}
           </>
         ) : (
-          /* CLIENT VIEW: Regular Bag & My Orders */
+          /* CLIENT DESKTOP */
           <>
             {user && (
               <div className="nav-notification-wrapper">
@@ -109,7 +112,6 @@ const Navbar = ({ cartCount, user }) => {
                   <Bell size={18} />
                   {unreadCount > 0 && <span className="notification-dot">{unreadCount}</span>}
                 </button>
-                
                 {showNotifications && (
                   <div className="notification-dropdown glass">
                     <div className="notif-header">
@@ -132,15 +134,12 @@ const Navbar = ({ cartCount, user }) => {
                 )}
               </div>
             )}
-
             {user && (
               <Link to="/my-orders" className="nav-link-brioni desktop-only">PESANAN SAYA</Link>
             )}
-
             <Link to="/cart" className="nav-link-brioni">
               BAG {cartCount > 0 && <span>({cartCount})</span>}
             </Link>
-
             {user ? (
               <Link to="/pengaturan" className="nav-link-brioni">PENGATURAN</Link>
             ) : (
