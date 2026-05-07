@@ -36,8 +36,8 @@ const About = () => {
       </section>
 
       <div className="about-content" style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px' }}>
-        <div className="about-manifesto" style={{ textAlign: 'center', margin: '8rem 0' }}>
-          <p style={{ fontFamily: 'var(--header-font)', fontSize: '2rem', lineHeight: '1.6', color: 'var(--text-primary)', fontWeight: '400' }}>
+        <div className="about-manifesto">
+          <p className="quote">
             "AURUMVICE was born from a simple vision: to curate a collection of products that don't just fill a space, but elevate an experience."
           </p>
           <div style={{ width: '40px', height: '1px', background: '#000', margin: '3rem auto' }}></div>
@@ -46,14 +46,14 @@ const About = () => {
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '8rem' }}>
+        <div className="about-craft-grid">
           <img src="/about-female.png" alt="Our Craft 1" style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover' }} />
           <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=1200" alt="Our Craft 2" style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover', marginTop: '4rem' }} />
         </div>
 
         <section style={{ marginBottom: '8rem' }}>
           <h2 style={{ fontFamily: 'var(--body-font)', fontSize: '1.2rem', letterSpacing: '0.4rem', textAlign: 'center', marginBottom: '4rem', textTransform: 'uppercase' }}>Our Foundation</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4rem', textAlign: 'center' }}>
+          <div className="foundation-grid">
             <div>
               <Award size={24} color="#000" style={{ marginBottom: '1.5rem' }} />
               <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.1rem', textTransform: 'uppercase', marginBottom: '1rem' }}>{aboutContent.excellence.title}</h3>

@@ -17,6 +17,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  touch-action: manipulation;
 }
 
 body {
@@ -235,6 +236,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 300;
   letter-spacing: 0.8rem;
   margin: 0;
+  line-height: 1.2;
 }
 
 .brioni-hero-btn {
@@ -923,8 +925,9 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 200px);
-  padding: 2rem;
+  min-height: 80vh;
+  padding: 2rem 0;
+  width: 100%;
 }
 
 .auth-card {
@@ -934,6 +937,9 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--luxury-shadow);
 }
 
 .auth-header {
@@ -1352,20 +1358,26 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.9rem;
 }
 
-@media (max-width: 1024px) {
-  .footer-grid {
-    grid-template-columns: 1fr 1fr;
+@media (max-width: 768px) {
+  .footer-top {
+    grid-template-columns: 1fr;
+    text-align: center;
     gap: 3rem;
   }
-  .footer-newsletter {
-    flex-direction: column;
-    text-align: center;
-  }
-}
 
-@media (max-width: 600px) {
-  .footer-grid {
+  .footer-grid-luxury {
     grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .footer-brand-luxury {
+    margin-bottom: 2rem;
+  }
+
+  .footer-bottom-luxury {
+    flex-direction: column;
+    gap: 2rem;
+    text-align: center;
   }
 }
 
@@ -1593,7 +1605,6 @@ h1, h2, h3, h4, h5, h6 {
   width: 120px;
 }
 
-/* Admin Styles */
 .admin-container {
     max-width: 800px;
     margin: 4rem auto;
@@ -1756,7 +1767,6 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 4rem;
     border-bottom: 1px solid var(--border-color);
 }
-
 .tab-btn {
     background: transparent;
     border: none;
@@ -1922,4 +1932,55 @@ h1, h2, h3, h4, h5, h6 {
     background: #d4af37;
     border-color: #d4af37;
     color: #fff;
+}
+/* About Page Refinement */
+.about-manifesto {
+  text-align: center;
+  margin: 8rem 0;
+}
+
+.about-manifesto p.quote {
+  font-family: var(--header-font);
+  font-size: 2rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  font-weight: 400;
+}
+
+.about-craft-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 8rem;
+}
+
+.foundation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4rem;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .about-manifesto {
+    margin: 4rem 0;
+  }
+  
+  .about-manifesto p.quote {
+    font-size: 1.4rem;
+  }
+
+  .about-craft-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .about-craft-grid img:nth-child(2) {
+    margin-top: 0 !important;
+  }
+
+  .foundation-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
 }
