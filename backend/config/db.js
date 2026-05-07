@@ -26,7 +26,9 @@ async function getPool() {
 }
 
 async function initDatabase() {
+    console.log("Starting initDatabase...");
     const p = await getPool();
+    console.log("Pool acquired for initDatabase");
 
     // Products Table
     await p.query(`CREATE TABLE IF NOT EXISTS products (

@@ -17,14 +17,17 @@ app.use(express.json());
 // Initialize DB for Serverless Environment (Vercel)
 let isDbInitialized = false;
 app.use(async (req, res, next) => {
-    if (process.env.VERCEL && !isDbInitialized) {
+    // Run for every first request regardless of VERCEL flag to be safe
+    if (!isDbInitialized) {
         try {
-            console.log("Lazy initializing database on Vercel...");
+            console.log("Initializing database schema...");
             await initDatabase();
             isDbInitialized = true;
-            console.log("Database initialized successfully on Vercel");
+            console.log("Database schema initialized successfully");
         } catch (err) {
-            console.error("Lazy DB Init Error:", err);
+            console.error("Database Init Error:", err);
+            // We don't call next(err) here because we want the app to stay alive, 
+            // but the next request will try again if isDbInitialized is still false.
         }
     }
     next();
@@ -520,6 +523,29 @@ app.put('/api/notifications/read-all/:userId', catchAsync(async (req, res) => {
     const pool = await getPool();
     await pool.query("UPDATE notifications SET is_read = TRUE WHERE user_id = $1", [req.params.userId]);
     res.json({ message: "All notifications marked as read" });
+}));
+
+
+// --- Admin / Failsafe Routes ---
+
+app.get('/api/admin/migrate', catchAsync(async (req, res) => {
+    try {
+        await initDatabase();
+        isDbInitialized = true;
+        res.json({ message: "Migration triggered successfully" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}));
+
+app.get('/api/health', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { rows } = await pool.query("SELECT 1 as connected");
+    res.json({ 
+        status: "ok", 
+        database: rows[0].connected === 1 ? "connected" : "error",
+        isDbInitialized 
+    });
 }));
 
 
