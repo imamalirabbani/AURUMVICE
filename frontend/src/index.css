@@ -313,12 +313,13 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0 auto;
 }
 
-/* Grid System */
+/* Mini Showcase Grid System */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 40px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
 }
+
 
 /* Luxury Product Card */
 .product-card-luxury {
@@ -333,8 +334,9 @@ h1, h2, h3, h4, h5, h6 {
   aspect-ratio: 3/4;
   overflow: hidden;
   background: transparent;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
 }
+
 
 .product-image {
   width: 100%;
@@ -356,13 +358,14 @@ h1, h2, h3, h4, h5, h6 {
 
 .product-overlay span {
   color: white;
-  font-size: 0.7rem;
-  letter-spacing: 0.2rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.15rem;
   background: var(--accent-gold);
-  padding: 15px 30px;
+  padding: 10px 20px;
   transform: translateY(20px);
   transition: all 0.6s cubic-bezier(0.2, 0, 0.2, 1);
 }
+
 
 .product-card-luxury:hover .product-image {
   transform: scale(1.03);
@@ -382,28 +385,29 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .product-category-luxury {
-  font-size: 0.65rem;
-  letter-spacing: 0.2rem;
+  font-size: 0.55rem;
+  letter-spacing: 0.15rem;
   color: var(--text-secondary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   text-transform: uppercase;
 }
 
 .product-name-luxury {
   font-family: var(--body-font);
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   font-weight: 400;
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   letter-spacing: 0.05rem;
   color: var(--text-primary);
 }
 
 .product-price-luxury {
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   font-weight: 400;
   color: var(--text-secondary);
 }
+
 
 
 
@@ -769,11 +773,12 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 90%;
   }
 
-  /* Product Grid */
+  /* Product Grid Mini */
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: 15px;
   }
+
 
   .collection-header h2 {
     font-size: 1.5rem;
