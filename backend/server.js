@@ -554,7 +554,8 @@ app.use((err, req, res, next) => {
     console.error("Server Error:", err.message);
     res.status(500).json({ 
         error: err.message || "Internal Server Error",
-        details: process.env.VERCEL ? "Check Vercel logs or database connection" : err.stack
+        stack: err.stack,
+        details: "Detailed error for debugging"
     });
 });
 
