@@ -111,7 +111,7 @@ const ProductDetail = ({ onAddToCart }) => {
             </div>
             
             <button className="btn btn-secondary" onClick={() => handleAddToCart(false)}>
-              <ShoppingCart size={18} /> Add to Cart
+              <ShoppingCart /> Add to Cart
             </button>
             <button className="btn btn-primary" onClick={() => handleAddToCart(true)}>
               Buy Now
@@ -120,21 +120,21 @@ const ProductDetail = ({ onAddToCart }) => {
 
           <div className="detail-benefits">
             <div className="benefit-item">
-              <Truck size={20} />
+              <Truck />
               <div>
                 <strong>Free Shipping</strong>
                 <p>On orders over Rp 5.000.000</p>
               </div>
             </div>
             <div className="benefit-item">
-              <Shield size={20} />
+              <Shield />
               <div>
                 <strong>2 Year Warranty</strong>
                 <p>Full coverage for manufacturing defects</p>
               </div>
             </div>
             <div className="benefit-item">
-              <RefreshCw size={20} />
+              <RefreshCw />
               <div>
                 <strong>30-Day Returns</strong>
                 <p>Easy returns if you're not satisfied</p>

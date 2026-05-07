@@ -55,17 +55,17 @@ const About = () => {
           <h2 style={{ fontFamily: 'var(--body-font)', fontSize: '1.2rem', letterSpacing: '0.4rem', textAlign: 'center', marginBottom: '4rem', textTransform: 'uppercase' }}>Our Foundation</h2>
           <div className="foundation-grid">
             <div>
-              <Award size={24} color="#000" style={{ marginBottom: '1.5rem' }} />
+              <Award color="#000" style={{ marginBottom: '1.5rem' }} />
               <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.1rem', textTransform: 'uppercase', marginBottom: '1rem' }}>{aboutContent.excellence.title}</h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.8' }}>{aboutContent.excellence.description}</p>
             </div>
             <div>
-              <ShieldCheck size={24} color="#000" style={{ marginBottom: '1.5rem' }} />
+              <ShieldCheck color="#000" style={{ marginBottom: '1.5rem' }} />
               <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.1rem', textTransform: 'uppercase', marginBottom: '1rem' }}>{aboutContent.integrity.title}</h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.8' }}>{aboutContent.integrity.description}</p>
             </div>
             <div>
-              <Zap size={24} color="#000" style={{ marginBottom: '1.5rem' }} />
+              <Zap color="#000" style={{ marginBottom: '1.5rem' }} />
               <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.1rem', textTransform: 'uppercase', marginBottom: '1rem' }}>{aboutContent.innovation.title}</h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.8' }}>{aboutContent.innovation.description}</p>
             </div>

@@ -56,9 +56,9 @@ const Footer = () => {
         <div className="footer-bottom-luxury">
           <p>&copy; {new Date().getFullYear()} AURUMVICE. ALL RIGHTS RESERVED.</p>
           <div className="footer-social-minimal">
-            <a href="#"><Globe size={16} /></a>
-            <a href="#"><Share2 size={16} /></a>
-            <a href="#"><Users size={16} /></a>
+            <a href="#"><Globe /></a>
+            <a href="#"><Share2 /></a>
+            <a href="#"><Users /></a>
           </div>
         </div>
       </div>

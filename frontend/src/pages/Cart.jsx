@@ -101,7 +101,7 @@ const CartPage = ({ onUpdateCart }) => {
                   </div>
                   
                   <button className="btn btn-danger" style={{ padding: '8px' }} onClick={() => handleRemove(item.id)}>
-                    <Trash2 size={18} />
+                    <Trash2 />
                   </button>
                 </div>
               </div>
@@ -116,7 +116,7 @@ const CartPage = ({ onUpdateCart }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Link to="/" className="btn btn-secondary">Continue Shopping</Link>
               <button className="btn btn-primary" onClick={handleCheckout} style={{ padding: '12px 30px', fontSize: '1.1rem' }}>
-                Proceed to Checkout <ArrowRight size={20} />
+                Proceed to Checkout <ArrowRight />
               </button>
             </div>
           </div>
