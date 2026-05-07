@@ -773,11 +773,24 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 90%;
   }
 
-  /* Product Grid Mini */
+  /* Product Grid Mini (Applies to all mobile) */
   .product-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
   }
+
+  .product-name-luxury {
+    font-size: 0.75rem !important;
+  }
+
+  .product-category-luxury {
+    font-size: 0.6rem !important;
+  }
+
+  .product-price-luxury {
+    font-size: 0.7rem !important;
+  }
+
 
 
   .collection-header h2 {
@@ -832,39 +845,8 @@ h1, h2, h3, h4, h5, h6 {
     position: static;
     margin-top: 2rem;
   }
-}
 
-@media (max-width: 480px) {
-  .brioni-hero-title {
-    font-size: 1.5rem;
-    letter-spacing: 0.3rem;
-  }
-
-  /* Force Mini Showcase on small phones */
-  .product-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .product-name-luxury {
-    font-size: 0.65rem;
-    letter-spacing: 0.02rem;
-  }
-
-  .product-category-luxury {
-    font-size: 0.5rem;
-  }
-
-  .product-price-luxury {
-    font-size: 0.6rem;
-  }
-  
-  .btn {
-    padding: 0.8rem 1.5rem;
-    font-size: 0.75rem;
-  }
-
-  /* Mini Footer Mobile */
+  /* Mini Footer Showcase (Applies to all mobile) */
   .footer-luxury {
     padding: 3rem 0 2rem;
     text-align: center;
@@ -881,45 +863,55 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: 0.3rem;
   }
 
-  .luxury-tagline {
-    font-size: 0.6rem;
-  }
-
   .footer-grid-luxury {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.8rem !important;
     text-align: left;
   }
 
   .footer-col-luxury h4 {
-    font-size: 0.6rem;
+    font-size: 0.65rem !important;
     margin-bottom: 1rem;
     white-space: nowrap;
   }
 
   .footer-col-luxury a {
-    font-size: 0.65rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.7rem !important;
+    margin-bottom: 0.6rem;
   }
 
-  .footer-newsletter-luxury {
-    padding: 3rem 0;
+}
+
+@media (max-width: 480px) {
+  .brioni-hero-title {
+    font-size: 1.5rem;
+    letter-spacing: 0.3rem;
   }
 
-  .newsletter-content h3 {
-    font-size: 1.1rem;
-    letter-spacing: 0.2rem;
-  }
-
-  .newsletter-content p {
+  .btn {
+    padding: 0.8rem 1.5rem;
     font-size: 0.75rem;
   }
 
-  .footer-bottom-luxury {
-    flex-direction: column;
-    gap: 1.5rem;
+  /* Extra Small Devices Adjustments */
+  .product-grid {
+    gap: 8px !important;
+  }
+
+  .product-name-luxury {
+    font-size: 0.65rem !important;
+  }
+
+  .footer-grid-luxury {
+    gap: 0.5rem !important;
+  }
+
+  .footer-col-luxury h4 {
+    font-size: 0.55rem !important;
   }
 }
+
 
 /* Mobile Menu Button & Side Panel */
 .mobile-menu-btn {
