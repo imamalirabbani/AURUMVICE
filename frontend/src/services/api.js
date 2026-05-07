@@ -87,5 +87,34 @@ export const api = {
     async getAbout() {
         const res = await fetch(`${BASE_URL}/about`);
         return handleResponse(res);
+    },
+
+    // Orders
+    async createOrder(orderData) {
+        const res = await fetch(`${BASE_URL}/orders`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
+        return handleResponse(res);
+    },
+
+    async getOrders() {
+        const res = await fetch(`${BASE_URL}/orders`);
+        return handleResponse(res);
+    },
+
+    async getOrder(id) {
+        const res = await fetch(`${BASE_URL}/orders/${id}`);
+        return handleResponse(res);
+    },
+
+    async updateOrderStatus(id, status) {
+        const res = await fetch(`${BASE_URL}/orders/${id}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+        });
+        return handleResponse(res);
     }
 };

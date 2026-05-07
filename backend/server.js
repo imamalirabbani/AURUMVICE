@@ -274,6 +274,94 @@ app.put('/api/about', catchAsync(async (req, res) => {
 }));
 
 
+// --- Order Routes ---
+
+// Create Order (Checkout)
+app.post('/api/orders', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { 
+        user_id, 
+        client_name, 
+        shipping_address, 
+        pic_name, 
+        phone_number, 
+        notes, 
+        payment_method, 
+        items,
+        total_amount 
+    } = req.body;
+
+    // 1. Create the order
+    const { rows: orderRows } = await pool.query(
+        `INSERT INTO orders 
+        (user_id, client_name, shipping_address, pic_name, phone_number, notes, payment_method, total_amount) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+        RETURNING id`,
+        [user_id, client_name, shipping_address, pic_name, phone_number, notes, payment_method, total_amount]
+    );
+
+    const orderId = orderRows[0].id;
+
+    // 2. Add items
+    for (const item of items) {
+        await pool.query(
+            "INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase) VALUES ($1, $2, $3, $4)",
+            [orderId, item.product_id, item.quantity, item.price]
+        );
+    }
+
+    // 3. Clear cart (optional: if user_id is provided, we might want to clear specific cart items, 
+    // but here we just clear the global cart for simplicity as the current system doesn't have multi-user cart isolation yet)
+    await pool.query("DELETE FROM cart");
+
+    res.status(201).json({ id: orderId, message: "Order placed successfully" });
+}));
+
+// Get all orders (Admin)
+app.get('/api/orders', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { rows: orders } = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
+    
+    // Enrich with items
+    const ordersWithItems = await Promise.all(orders.map(async (order) => {
+        const { rows: items } = await pool.query(`
+            SELECT oi.*, p.name, p.image 
+            FROM order_items oi 
+            JOIN products p ON oi.product_id = p.id 
+            WHERE oi.order_id = $1
+        `, [order.id]);
+        return { ...order, items };
+    }));
+
+    res.json(ordersWithItems);
+}));
+
+// Get single order details
+app.get('/api/orders/:id', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { rows: orders } = await pool.query("SELECT * FROM orders WHERE id = $1", [req.params.id]);
+    
+    if (orders.length === 0) return res.status(404).json({ error: "Order not found" });
+    
+    const { rows: items } = await pool.query(`
+        SELECT oi.*, p.name, p.image 
+        FROM order_items oi 
+        JOIN products p ON oi.product_id = p.id 
+        WHERE oi.order_id = $1
+    `, [req.params.id]);
+
+    res.json({ ...orders[0], items });
+}));
+
+// Update order status (Admin)
+app.put('/api/orders/:id/status', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { status } = req.body;
+    await pool.query("UPDATE orders SET status = $1 WHERE id = $2", [status, req.params.id]);
+    res.json({ message: "Order status updated" });
+}));
+
+
 // Centralized Error Handler
 app.use((err, req, res, next) => {
     console.error("Server Error:", err.message);

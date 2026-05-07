@@ -11,6 +11,9 @@ import ProductDetail from './pages/ProductDetail';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Pengaturan from './pages/Pengaturan';
+import Checkout from './pages/Checkout';
+import OrderSuccess from './pages/OrderSuccess';
+import AdminOrders from './pages/AdminOrders';
 import { api } from './services/api';
 import './index.css';
 
@@ -64,6 +67,9 @@ function App() {
           <Route path="/login" element={<Login onLogin={setUser} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/pengaturan" element={<Pengaturan user={user} onLogout={handleLogout} onUpdateUser={setUser} />} />
+          <Route path="/checkout" element={<Checkout user={user} onOrderComplete={fetchCart} />} />
+          <Route path="/order-success/:id" element={<OrderSuccess />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
         </Routes>
       </main>
       <Footer />

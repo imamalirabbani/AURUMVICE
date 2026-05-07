@@ -24,7 +24,7 @@ const ProductCard = ({ product }) => {
       </Link>
       
       <div className="product-info-luxury">
-        <div className="product-category-luxury">{product.category.toUpperCase()}</div>
+        <div className="product-category-luxury">{product.category?.toUpperCase()}</div>
         <h3 className="product-name-luxury">{product.name}</h3>
         <p className="product-price-luxury">{formatPrice(product.price)}</p>
       </div>

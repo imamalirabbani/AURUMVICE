@@ -27,7 +27,7 @@ async function getPool() {
 
 async function initDatabase() {
     const p = await getPool();
-    
+
     // Products Table
     await p.query(`CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
@@ -59,6 +59,30 @@ async function initDatabase() {
         id SERIAL PRIMARY KEY,
         product_id INT REFERENCES products(id) ON DELETE CASCADE,
         image_url VARCHAR(255)
+    )`);
+
+    // Orders Table
+    await p.query(`CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY,
+        user_id INT REFERENCES users(id),
+        client_name VARCHAR(255),
+        shipping_address TEXT,
+        pic_name VARCHAR(255),
+        phone_number VARCHAR(50),
+        notes TEXT,
+        payment_method VARCHAR(50),
+        total_amount NUMERIC(15,2),
+        status VARCHAR(20) DEFAULT 'Pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Order Items Table
+    await p.query(`CREATE TABLE IF NOT EXISTS order_items (
+        id SERIAL PRIMARY KEY,
+        order_id INT REFERENCES orders(id) ON DELETE CASCADE,
+        product_id INT REFERENCES products(id),
+        quantity INT,
+        price_at_purchase NUMERIC(15,2)
     )`);
 
     // About Content Table

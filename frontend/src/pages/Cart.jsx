@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api, BASE_URL, IMAGE_BASE_URL } from '../services/api';
 
 const CartPage = ({ onUpdateCart }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchCartItems = async () => {
     setLoading(true);
@@ -43,22 +44,9 @@ const CartPage = ({ onUpdateCart }) => {
     }
   };
 
-  const handleCheckout = async () => {
-    try {
-      if (cartItems.length === 0) return;
-      
-      const confirmBuy = window.confirm(`Apakah Anda yakin ingin membeli ${cartItems.length} barang dengan total ${formatPrice(total)}?`);
-      
-      if (confirmBuy) {
-        await api.clearCart();
-        alert('Terima kasih! Pesanan Anda sedang diproses.');
-        await fetchCartItems();
-        onUpdateCart();
-      }
-    } catch (err) {
-      console.error("Checkout failed:", err);
-      alert("Terjadi kesalahan saat checkout.");
-    }
+  const handleCheckout = () => {
+    if (cartItems.length === 0) return;
+    navigate('/checkout');
   };
 
   const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
