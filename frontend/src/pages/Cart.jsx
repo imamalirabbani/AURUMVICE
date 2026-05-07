@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api, BASE_URL, IMAGE_BASE_URL } from '../services/api';
+import { api, BASE_URL, IMAGE_BASE_URL, getImgUrl } from '../services/api';
 
 const CartPage = ({ onUpdateCart }) => {
   const [cartItems, setCartItems] = useState([]);
@@ -26,12 +26,6 @@ const CartPage = ({ onUpdateCart }) => {
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(price);
-  };
-
-  const getImgUrl = (url) => {
-    if (!url) return 'https://via.placeholder.com/800x600?text=No+Image';
-    if (url.startsWith('http')) return url;
-    return `${IMAGE_BASE_URL}${url}`;
   };
 
   const handleRemove = async (cartId) => {

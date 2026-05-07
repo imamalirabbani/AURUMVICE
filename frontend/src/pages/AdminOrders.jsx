@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { api, getImgUrl } from '../services/api';
 import { Package, Truck, CheckCircle, XCircle, Clock, Eye, Printer, MapPin, Send, Trash2 } from 'lucide-react';
 
 const AdminOrders = () => {
@@ -247,7 +247,7 @@ const AdminOrders = () => {
                     <div className="proof-preview-admin">
                       <p>Bukti Transfer:</p>
                       <a href={selectedOrder.payment_proof_url} target="_blank" rel="noreferrer">
-                        <img src={selectedOrder.payment_proof_url} alt="Bukti Pembayaran" className="admin-proof-img" />
+                        <img src={getImgUrl(selectedOrder.payment_proof_url)} alt="Bukti Pembayaran" className="admin-proof-img" />
                       </a>
                       <div className="feedback-selector">
                         <label>Informasi untuk Client:</label>

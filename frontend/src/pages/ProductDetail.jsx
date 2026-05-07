@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ShoppingCart, ArrowLeft, Star, Shield, Truck, RefreshCw } from 'lucide-react';
-import { api, IMAGE_BASE_URL } from '../services/api';
+import { api, IMAGE_BASE_URL, getImgUrl } from '../services/api';
 
 const ProductDetail = ({ onAddToCart }) => {
   const { id } = useParams();
@@ -26,24 +26,6 @@ const ProductDetail = ({ onAddToCart }) => {
     };
     fetchProduct();
   }, [id]);
-
-  const getImgUrl = (url) => {
-    if (!url) return 'https://via.placeholder.com/800x1000?text=AURUMVICE+Collection';
-    
-    // Fix malformed URLs like "https//..." (missing colon)
-    let cleanUrl = url;
-    if (url.startsWith('https//')) {
-      cleanUrl = url.replace('https//', 'https://');
-    } else if (url.startsWith('http//')) {
-      cleanUrl = url.replace('http//', 'http://');
-    }
-
-    if (cleanUrl.startsWith('http')) return cleanUrl;
-    
-    // Ensure relative paths start with /
-    const separator = cleanUrl.startsWith('/') ? '' : '/';
-    return `${IMAGE_BASE_URL}${separator}${cleanUrl}`;
-  };
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(price);
