@@ -16,22 +16,65 @@ const IntroAnimation = ({ onComplete }) => {
     <div className={`intro-animation-white ${phase}`}>
       <div className="intro-center">
         <div className="intro-av-logo">
-          <svg viewBox="0 0 400 300" className="intro-av-svg">
+          <svg viewBox="0 0 300 300" className="intro-av-svg">
             <defs>
-              <filter id="leatherNoise">
-                <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="4" stitchTiles="stitch"/>
-                <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
-                <feComposite operator="in" in2="SourceGraphic" result="texture"/>
-                <feBlend mode="multiply" in="texture" in2="SourceGraphic" />
+              <filter id="leatherTexture">
+                <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" result="noise" />
+                <feDiffuseLighting in="noise" lightingColor="#111111" surfaceScale="2">
+                  <feDistantLight azimuth="45" elevation="60" />
+                </feDiffuseLighting>
+                <feComposite operator="in" in2="SourceGraphic" />
+              </filter>
+              
+              <filter id="paperTexture">
+                <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5" result="noise" />
+                <feDiffuseLighting in="noise" lightingColor="#ffffff" surfaceScale="1">
+                  <feDistantLight azimuth="45" elevation="40" />
+                </feDiffuseLighting>
               </filter>
             </defs>
-            <g filter="url(#leatherNoise)" fill="#1a1a1a">
-              {/* High-Accuracy Serif AV Ligature */}
-              <path d="M75,240 L125,240 L125,237 L110,237 C100,237 98,234 100,225 L160,80 L175,80 L245,225 C247,234 245,237 235,237 L220,237 L220,240 L265,240 L265,237 L255,237 C245,237 243,234 245,225 L240,212 L145,212 L140,225 C138,234 136,237 126,237 Z M150,200 L235,200 L192,105 Z" />
-              <path d="M185,80 L235,80 L235,83 L220,83 C210,83 208,86 210,95 L260,225 C262,234 260,237 250,237 L235,237 L235,240 L280,240 L280,237 L270,237 C260,237 258,234 260,225 L315,95 C317,86 315,83 305,83 L290,83 L290,80 L340,80 L340,83 L330,83 C320,83 318,86 320,95 L270,210 L245,150 L215,80 Z" />
+
+            {/* Subtle background texture */}
+            <rect width="300" height="300" filter="url(#paperTexture)" opacity="0.05" />
+
+            <g filter="url(#leatherTexture)">
+              {/* Left Thin Leg of A */}
+              <path 
+                d="M85,230 L135,80" 
+                stroke="#1a1a1a" 
+                strokeWidth="5" 
+                fill="none" 
+              />
               
-              {/* Central connection bar matching image style */}
-              <rect x="135" y="153" width="125" height="1.5" />
+              {/* Bottom Serif A */}
+              <path d="M70,230 L100,230" stroke="#1a1a1a" strokeWidth="2.5" />
+
+              {/* Shared Middle Thick Leg */}
+              <path 
+                d="M135,80 L175,230" 
+                stroke="#1a1a1a" 
+                strokeWidth="20" 
+                fill="none" 
+              />
+
+              {/* Right Thin Leg of V */}
+              <path 
+                d="M175,230 L225,80" 
+                stroke="#1a1a1a" 
+                strokeWidth="5" 
+                fill="none" 
+              />
+
+              {/* Top Serif V */}
+              <path d="M210,80 L240,80" stroke="#1a1a1a" strokeWidth="2.5" />
+
+              {/* Extended Horizontal Bar */}
+              <path 
+                d="M102,158 L195,158" 
+                stroke="#1a1a1a" 
+                strokeWidth="3.5" 
+                fill="none" 
+              />
             </g>
           </svg>
         </div>
