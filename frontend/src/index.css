@@ -1610,79 +1610,57 @@ h1, h2, h3, h4, h5, h6 {
   right: -50px;
 }
 
-/* Intro Animation Styles - White */
-.intro-animation-white {
+/* Intro Animation Styles - Framer Motion Version */
+.intro-animation-framer {
   position: fixed;
   inset: 0;
   background: #fdfdfd;
-  background-image: radial-gradient(circle at center, #ffffff 0%, #f7f7f7 100%);
   z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 1.5s ease;
+  overflow: hidden;
 }
 
-.intro-animation-white.exit {
-  opacity: 0;
-  pointer-events: none;
+.intro-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at center, #ffffff 0%, #f7f7f7 100%);
+  opacity: 0.8;
+  z-index: -1;
 }
 
-.intro-center {
+.intro-logo-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
 }
 
-.intro-av-logo {
+.intro-av-logo-wrapper {
   width: 280px;
   height: 280px;
-  opacity: 0;
-  transform: scale(0.95);
-  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.05));
-  transition: all 2.5s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
 }
 
-.intro-animation-white.reveal .intro-av-logo,
-.intro-animation-white.text .intro-av-logo,
-.intro-animation-white.exit .intro-av-logo {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.intro-av-svg {
+.intro-av-svg-framer {
   width: 100%;
   height: 100%;
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.08));
 }
 
-.intro-white-brand {
-  font-family: var(--header-font);
-  font-size: 1.4rem;
-  letter-spacing: 0.8rem;
-  color: #1a1a1a;
-  opacity: 0;
-  transform: translateY(15px);
-  transition: all 2s cubic-bezier(0.16, 1, 0.3, 1);
+.intro-glow {
+  position: absolute;
+  inset: -50px;
+  background: radial-gradient(circle at center, rgba(0,0,0,0.2) 0%, transparent 70%);
+  filter: blur(40px);
+  z-index: 1;
+  pointer-events: none;
 }
 
-.intro-animation-white.text .intro-white-brand,
-.intro-animation-white.exit .intro-white-brand {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.intro-white-line {
-  width: 0;
-  height: 1px;
-  background: #1a1a1a;
-  transition: width 2.5s cubic-bezier(0.16, 1, 0.3, 1) 0.5s;
-}
-
-.intro-animation-white.text .intro-white-line,
-.intro-animation-white.exit .intro-white-line {
-  width: 120px;
-}
 
 .admin-container {
     max-width: 800px;
