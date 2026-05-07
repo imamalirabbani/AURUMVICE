@@ -17,20 +17,24 @@ app.use(express.json());
 // Initialize DB for Serverless Environment (Vercel)
 let isDbInitialized = false;
 app.use(async (req, res, next) => {
-    // Run for every first request regardless of VERCEL flag to be safe
     if (!isDbInitialized) {
         try {
             console.log("Initializing database schema...");
             await initDatabase();
             isDbInitialized = true;
             console.log("Database schema initialized successfully");
+            next();
         } catch (err) {
             console.error("Database Init Error:", err);
-            // We don't call next(err) here because we want the app to stay alive, 
-            // but the next request will try again if isDbInitialized is still false.
+            res.status(500).json({ 
+                error: "Database Initialization Failed", 
+                message: err.message,
+                stack: err.stack 
+            });
         }
+    } else {
+        next();
     }
-    next();
 });
 
 // Setup uploads folder (local dev only)

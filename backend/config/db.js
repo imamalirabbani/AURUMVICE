@@ -1,7 +1,11 @@
 const { Pool } = require('pg');
 
 const dbConfig = {
-    connectionString: process.env.DATABASE_URL || 'postgresql://postgres.fhljkxnptsbiopncbmmg:zdQrUSU%2F6AYepTz@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres',
+    user: 'postgres.fhljkxnptsbiopncbmmg',
+    host: 'aws-1-ap-southeast-1.pooler.supabase.com',
+    database: 'postgres',
+    password: 'zdQrUSU/6AYepTz', // Special character / is handled directly
+    port: 6543,
     ssl: {
         rejectUnauthorized: false
     }
