@@ -63,8 +63,8 @@ const OrderSuccess = () => {
           <h1>Pesanan Berhasil!</h1>
           <p>Terima kasih atas kepercayaan Anda pada AURUMVICE.</p>
           <div className="order-number">Order ID: #{order.id.toString().padStart(6, '0')}</div>
-          <div className={`payment-status-badge ${order.payment_status.toLowerCase().replace(/\s+/g, '-')}`}>
-            {order.payment_status}
+          <div className={`payment-status-badge ${(order.payment_status || 'Unpaid').toLowerCase().replace(/\s+/g, '-')}`}>
+            {order.payment_status || 'Unpaid'}
           </div>
         </div>
 

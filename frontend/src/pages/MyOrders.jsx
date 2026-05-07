@@ -68,14 +68,14 @@ const MyOrders = ({ user }) => {
                     </div>
                     <div className="info-item">
                       <label>STATUS</label>
-                      <span className={`status-badge ${order.status.toLowerCase()}`}>
+                      <span className={`status-badge ${(order.status || 'Pending').toLowerCase()}`}>
                         {getStatusIcon(order.status)} {order.status}
                       </span>
                     </div>
                     <div className="info-item">
                       <label>PEMBAYARAN</label>
-                      <span className={`status-badge mini ${order.payment_status.toLowerCase().replace(/\s+/g, '-')}`}>
-                        {order.payment_status}
+                      <span className={`status-badge mini ${(order.payment_status || 'Unpaid').toLowerCase().replace(/\s+/g, '-')}`}>
+                        {order.payment_status || 'Unpaid'}
                       </span>
                     </div>
                   </div>

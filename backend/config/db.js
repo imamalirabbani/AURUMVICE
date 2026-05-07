@@ -115,6 +115,22 @@ async function initDatabase() {
         description TEXT
     )`);
 
+    // Add missing columns to orders if they don't exist
+    const columns = [
+        { name: 'payment_status', def: "VARCHAR(20) DEFAULT 'Unpaid'" },
+        { name: 'payment_proof_url', def: "TEXT" },
+        { name: 'tracking_number', def: "VARCHAR(100)" },
+        { name: 'shipping_courier', def: "VARCHAR(50)" }
+    ];
+
+    for (const col of columns) {
+        try {
+            await p.query(`ALTER TABLE orders ADD COLUMN ${col.name} ${col.def}`);
+        } catch (err) {
+            // Ignore if column already exists (error code 42701)
+        }
+    }
+
     // Insert default about content if empty
     const { rows: aboutRows } = await p.query("SELECT * FROM about_content");
     if (aboutRows.length === 0) {
