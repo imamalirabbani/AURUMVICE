@@ -30,8 +30,18 @@ async function initDatabase() {
     const p = await getPool();
     console.log("Pool acquired for initDatabase");
 
-    // Products Table
-    await p.query(`CREATE TABLE IF NOT EXISTS products (
+    const runQuery = async (name, query) => {
+        try {
+            await p.query(query);
+            console.log(`Success: ${name}`);
+        } catch (err) {
+            console.error(`Failed: ${name}`, err.message);
+            // Re-throw if it's not a "already exists" error
+            if (!err.message.includes('already exists')) throw err;
+        }
+    };
+
+    await runQuery("Products Table", `CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         description TEXT,
@@ -40,8 +50,7 @@ async function initDatabase() {
         image VARCHAR(255)
     )`);
 
-    // Users Table
-    await p.query(`CREATE TABLE IF NOT EXISTS users (
+    await runQuery("Users Table", `CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(255) UNIQUE NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
@@ -49,22 +58,19 @@ async function initDatabase() {
         address TEXT
     )`);
 
-    // Cart Table
-    await p.query(`CREATE TABLE IF NOT EXISTS cart (
+    await runQuery("Cart Table", `CREATE TABLE IF NOT EXISTS cart (
         id SERIAL PRIMARY KEY,
         product_id INT REFERENCES products(id) ON DELETE CASCADE,
         quantity INT
     )`);
 
-    // Product Images Table
-    await p.query(`CREATE TABLE IF NOT EXISTS product_images (
+    await runQuery("Product Images Table", `CREATE TABLE IF NOT EXISTS product_images (
         id SERIAL PRIMARY KEY,
         product_id INT REFERENCES products(id) ON DELETE CASCADE,
         image_url VARCHAR(255)
     )`);
 
-    // Orders Table
-    await p.query(`CREATE TABLE IF NOT EXISTS orders (
+    await runQuery("Orders Table", `CREATE TABLE IF NOT EXISTS orders (
         id SERIAL PRIMARY KEY,
         user_id INT REFERENCES users(id),
         client_name VARCHAR(255),
@@ -82,8 +88,7 @@ async function initDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
 
-    // Order Items Table
-    await p.query(`CREATE TABLE IF NOT EXISTS order_items (
+    await runQuery("Order Items Table", `CREATE TABLE IF NOT EXISTS order_items (
         id SERIAL PRIMARY KEY,
         order_id INT REFERENCES orders(id) ON DELETE CASCADE,
         product_id INT REFERENCES products(id),
@@ -91,8 +96,7 @@ async function initDatabase() {
         price_at_purchase NUMERIC(15,2)
     )`);
 
-    // Tracking Logs Table
-    await p.query(`CREATE TABLE IF NOT EXISTS tracking_logs (
+    await runQuery("Tracking Logs Table", `CREATE TABLE IF NOT EXISTS tracking_logs (
         id SERIAL PRIMARY KEY,
         order_id INT REFERENCES orders(id) ON DELETE CASCADE,
         status_update TEXT NOT NULL,
@@ -100,8 +104,7 @@ async function initDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
 
-    // Notifications Table
-    await p.query(`CREATE TABLE IF NOT EXISTS notifications (
+    await runQuery("Notifications Table", `CREATE TABLE IF NOT EXISTS notifications (
         id SERIAL PRIMARY KEY,
         user_id INT REFERENCES users(id),
         message TEXT NOT NULL,
@@ -110,8 +113,7 @@ async function initDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
 
-    // About Content Table
-    await p.query(`CREATE TABLE IF NOT EXISTS about_content (
+    await runQuery("About Content Table", `CREATE TABLE IF NOT EXISTS about_content (
         section_key VARCHAR(50) PRIMARY KEY,
         title VARCHAR(255),
         description TEXT
@@ -128,29 +130,33 @@ async function initDatabase() {
     for (const col of columns) {
         try {
             await p.query(`ALTER TABLE orders ADD COLUMN ${col.name} ${col.def}`);
+            console.log(`Column ${col.name} added to orders.`);
         } catch (err) {
             // Ignore if column already exists (error code 42701)
         }
     }
 
-    // Insert default about content if empty
-    const { rows: aboutRows } = await p.query("SELECT * FROM about_content");
-    if (aboutRows.length === 0) {
-        await p.query(`INSERT INTO about_content (section_key, title, description) VALUES 
-            ('excellence', 'Excellence', 'We settle for nothing less than the best in every product we offer.'),
-            ('integrity', 'Integrity', 'Transparency and trust are the foundations of our relationship with you.'),
-            ('innovation', 'Innovation', 'Constantly seeking new ways to enhance your shopping experience.')
-        `);
-    }
+    // Default Data
+    try {
+        const { rows: aboutRows } = await p.query("SELECT * FROM about_content");
+        if (aboutRows.length === 0) {
+            await p.query(`INSERT INTO about_content (section_key, title, description) VALUES 
+                ('excellence', 'Excellence', 'We settle for nothing less than the best in every product we offer.'),
+                ('integrity', 'Integrity', 'Transparency and trust are the foundations of our relationship with you.'),
+                ('innovation', 'Innovation', 'Constantly seeking new ways to enhance your shopping experience.')
+            `);
+        }
 
-    // Insert default admin user if empty
-    const { rows: userRows } = await p.query("SELECT * FROM users WHERE username = $1", ['admin']);
-    if (userRows.length === 0) {
-        await p.query(
-            "INSERT INTO users (username, email, password, address) VALUES ($1, $2, $3, $4)",
-            ['admin', 'admin@aurumvice.com', 'admin123', 'AURUMVICE HQ']
-        );
-        console.log("Default admin user created: admin / admin123");
+        const { rows: userRows } = await p.query("SELECT * FROM users WHERE username = $1", ['admin']);
+        if (userRows.length === 0) {
+            await p.query(
+                "INSERT INTO users (username, email, password, address) VALUES ($1, $2, $3, $4)",
+                ['admin', 'admin@aurumvice.com', 'admin123', 'AURUMVICE HQ']
+            );
+            console.log("Default admin user created");
+        }
+    } catch (err) {
+        console.error("Default data insertion failed:", err.message);
     }
 }
 
