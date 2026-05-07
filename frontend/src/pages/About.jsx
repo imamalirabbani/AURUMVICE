@@ -74,9 +74,13 @@ const About = () => {
 
         <section style={{ padding: '6rem 0', textAlign: 'center', borderTop: '1px solid var(--border-color)' }}>
           <h2 style={{ fontFamily: 'var(--header-font)', fontSize: '2.5rem', marginBottom: '1.5rem' }}>Experience Aurumvice</h2>
-          <p style={{ maxWidth: '500px', margin: '0 auto 3rem', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+          <p style={{ maxWidth: '500px', margin: '0 auto 1rem', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
             We are more than just a store; we are a lifestyle movement. Step into the world of uncompromising quality.
           </p>
+          <div style={{ marginBottom: '3rem' }}>
+            <p style={{ fontSize: '0.8rem', letterSpacing: '0.1rem', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>Customer Inquiries</p>
+            <a href="mailto:imamalirabbani@gmail.com" style={{ color: '#000', fontSize: '1.1rem', textDecoration: 'none', borderBottom: '1px solid #000', paddingBottom: '2px' }}>imamalirabbani@gmail.com</a>
+          </div>
           <button className="btn btn-primary" style={{ padding: '15px 40px' }} onClick={() => navigate('/')}>EXPLORE COLLECTION</button>
         </section>
       </div>

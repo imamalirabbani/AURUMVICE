@@ -26,7 +26,7 @@ const Footer = () => {
               <Link to="/about">Our Story</Link>
               <Link to="/">Craftsmanship</Link>
               <Link to="/">Sustainability</Link>
-              <Link to="/">Contact</Link>
+              <a href="mailto:imamalirabbani@gmail.com">Contact</a>
             </div>
             
             <div className="footer-col-luxury">
