@@ -17,24 +17,36 @@ const IntroAnimation = ({ onComplete }) => {
       <div className="intro-center">
         <div className="intro-av-logo">
           <svg viewBox="0 0 300 200" className="intro-av-svg">
-            {/* A - left leg (thick) */}
-            <polygon points="60,170 72,170 120,40 112,40" fill="#1a1a1a" />
-            {/* A - right leg / V - left leg (shared diagonal, thick) */}
-            <polygon points="112,40 120,40 168,170 160,170" fill="#1a1a1a" />
-            {/* A - crossbar */}
-            <rect x="82" y="118" width="60" height="3.5" fill="#1a1a1a" />
-            
-            {/* V - right leg (thick) */}
-            <polygon points="160,170 168,170 240,40 228,40" fill="#1a1a1a" />
-            
-            {/* A - left serif bottom */}
-            <rect x="52" y="168" width="28" height="3" fill="#1a1a1a" />
-            {/* A - top serif */}
-            <rect x="105" y="37" width="22" height="2.5" fill="#1a1a1a" />
-            {/* V - right serif top */}
-            <rect x="224" y="37" width="22" height="2.5" fill="#1a1a1a" />
-            {/* shared bottom serif */}
-            <rect x="152" y="168" width="24" height="3" fill="#1a1a1a" />
+            <defs>
+              <filter id="leatherNoise">
+                <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="4" stitchTiles="stitch"/>
+                <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+                <feComposite operator="in" in2="SourceGraphic" result="texture"/>
+                <feBlend mode="multiply" in="texture" in2="SourceGraphic" />
+              </filter>
+            </defs>
+            <g filter="url(#leatherNoise)">
+              {/* A - left leg (thin) */}
+              <polygon points="67,160 73,160 123,40 117,40" fill="#1a1a1a" />
+              
+              {/* Middle leg (thick) */}
+              <polygon points="163,160 187,160 147,40 123,40" fill="#1a1a1a" />
+              
+              {/* V - right leg (thin) */}
+              <polygon points="182,160 188,160 238,40 232,40" fill="#1a1a1a" />
+              
+              {/* A - crossbar */}
+              <rect x="90" y="104" width="95" height="3" fill="#1a1a1a" />
+              
+              {/* A - left bottom serif */}
+              <rect x="55" y="158" width="30" height="2" fill="#1a1a1a" />
+              
+              {/* A - top left serif */}
+              <rect x="105" y="40" width="18" height="2" fill="#1a1a1a" />
+              
+              {/* V - right top serif */}
+              <rect x="220" y="40" width="30" height="2" fill="#1a1a1a" />
+            </g>
           </svg>
         </div>
 
