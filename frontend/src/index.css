@@ -775,66 +775,94 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .brioni-hero-overlay {
-    padding: 1.5rem !important;
+    padding: 1rem !important;
     justify-content: center;
-    background: rgba(0,0,0,0.2); /* Lighter overlay for wider aspect */
+    gap: 0.8rem;
+    background: rgba(0,0,0,0.3);
   }
 
   .brioni-hero-title {
-    font-size: 1.8rem;
-    letter-spacing: 0.4rem;
-    margin-bottom: 1rem;
+    font-size: 1rem;
+    letter-spacing: 0.2rem;
+    margin-bottom: 0;
+    white-space: nowrap;
   }
 
   .brioni-search-container {
     max-width: 90%;
-    margin-top: 1rem;
+    margin-top: 0;
+  }
+
+  .hero-search-input {
+    font-size: 0.7rem !important;
+    padding: 8px 30px 8px 0 !important;
+  }
+
+  .brioni-hero-btn {
+    padding: 0.6rem 1.8rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.1rem;
   }
 
 
   /* Product Grid Mini (Applies to all mobile) */
-  /* Mini Showcase Grid */
+  /* Mini Showcase Grid — 4 per row */
   .product-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important; /* Smaller gap for mini look */
-    padding: 0 5px;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 6px !important;
+    padding: 0 8px;
+    margin-top: 1rem;
   }
 
   .product-card-luxury {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .product-info-luxury {
-    padding: 0.8rem 0.2rem !important; /* Tighter padding */
+    padding: 0.4rem 0.1rem !important;
   }
 
   .product-name-luxury {
-    font-size: 0.7rem !important;
-    letter-spacing: 0.05rem !important;
-    margin-bottom: 0.2rem !important;
-    line-height: 1.2 !important;
+    font-size: 0.5rem !important;
+    letter-spacing: 0.02rem !important;
+    margin-bottom: 0.1rem !important;
+    line-height: 1.1 !important;
+    font-weight: 500;
   }
 
   .product-category-luxury {
-    font-size: 0.55rem !important;
-    letter-spacing: 0.1rem !important;
-    margin-bottom: 0.2rem !important;
+    font-size: 0.4rem !important;
+    letter-spacing: 0.05rem !important;
+    margin-bottom: 0.1rem !important;
+    opacity: 0.8;
   }
 
   .product-price-luxury {
-    font-size: 0.65rem !important;
+    font-size: 0.45rem !important;
     font-weight: 600 !important;
+    color: var(--text-primary);
   }
 
   .product-image-wrapper {
-    aspect-ratio: 3/4; /* Slightly more vertical for luxury feel */
+    aspect-ratio: 3/4;
+  }
+
+  .product-overlay span {
+    font-size: 0.4rem !important;
+    padding: 5px 8px !important;
+    letter-spacing: 0.05rem !important;
   }
 
 
 
   .collection-header h2 {
-    font-size: 1.4rem;
-    letter-spacing: 0.3rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .collection-divider {
+    width: 40px !important;
   }
 
   /* Product Detail */
@@ -927,8 +955,13 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (max-width: 480px) {
   .brioni-hero-title {
-    font-size: 1.5rem;
-    letter-spacing: 0.3rem;
+    font-size: 1rem;
+    letter-spacing: 0.2rem;
+  }
+
+  .brioni-hero-btn {
+    padding: 0.6rem 1.8rem;
+    font-size: 0.6rem;
   }
 
   .btn {
@@ -937,14 +970,6 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   /* Extra Small Devices Adjustments */
-  .product-grid {
-    gap: 8px !important;
-  }
-
-  .product-name-luxury {
-    font-size: 0.65rem !important;
-  }
-
   .footer-grid-luxury {
     gap: 0.5rem !important;
   }
