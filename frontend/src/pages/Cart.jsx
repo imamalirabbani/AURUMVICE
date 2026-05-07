@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
+import { Trash2, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { api, BASE_URL, IMAGE_BASE_URL } from '../services/api';
 
 const CartPage = ({ onUpdateCart }) => {
   const [cartItems, setCartItems] = useState([]);
@@ -9,8 +10,7 @@ const CartPage = ({ onUpdateCart }) => {
   const fetchCartItems = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3002/api/cart');
-      const data = await res.json();
+      const data = await api.getCart();
       setCartItems(data);
     } catch (err) {
       console.error("Failed to fetch cart items", err);
@@ -30,12 +30,12 @@ const CartPage = ({ onUpdateCart }) => {
   const getImgUrl = (url) => {
     if (!url) return 'https://via.placeholder.com/800x600?text=No+Image';
     if (url.startsWith('http')) return url;
-    return `http://localhost:3002${url}`;
+    return `${IMAGE_BASE_URL}${url}`;
   };
 
   const handleRemove = async (cartId) => {
     try {
-      await fetch(`http://localhost:3002/api/cart/${cartId}`, { method: 'DELETE' });
+      await api.removeFromCart(cartId);
       await fetchCartItems();
       onUpdateCart();
     } catch (err) {
@@ -50,7 +50,7 @@ const CartPage = ({ onUpdateCart }) => {
       const confirmBuy = window.confirm(`Apakah Anda yakin ingin membeli ${cartItems.length} barang dengan total ${formatPrice(total)}?`);
       
       if (confirmBuy) {
-        await fetch('http://localhost:3002/api/cart', { method: 'DELETE' });
+        await api.clearCart();
         alert('Terima kasih! Pesanan Anda sedang diproses.');
         await fetchCartItems();
         onUpdateCart();

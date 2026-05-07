@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Award, ShieldCheck, Zap } from 'lucide-react';
+import { BASE_URL } from '../services/api';
 
 const About = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const About = () => {
     window.scrollTo(0, 0);
     
     // Fetch about content from backend
-    fetch('http://localhost:3002/api/about')
+    fetch(`${BASE_URL}/about`)
       .then(res => res.json())
       .then(data => {
         if (data && Object.keys(data).length > 0) {

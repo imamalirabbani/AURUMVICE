@@ -229,9 +229,13 @@ app.use((err, req, res, next) => {
 });
 
 // Initialize and Start
-initDatabase().then(() => {
-    app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-}).catch(err => {
-    console.error("Database initialization failed:", err);
-});
+if (process.env.NODE_ENV !== 'test') {
+    initDatabase().then(() => {
+        app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+    }).catch(err => {
+        console.error("Database initialization failed:", err);
+    });
+}
+
+module.exports = app;
 

@@ -1,4 +1,5 @@
-const BASE_URL = 'http://localhost:3002/api';
+export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+export const IMAGE_BASE_URL = BASE_URL.replace('/api', '');
 
 const handleResponse = async (response) => {
     const data = await response.json();

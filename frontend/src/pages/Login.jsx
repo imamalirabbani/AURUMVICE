@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Lock } from 'lucide-react';
+import { api } from '../services/api';
 
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
@@ -13,23 +14,13 @@ const Login = ({ onLogin }) => {
     setError('');
     
     try {
-      const res = await fetch('http://localhost:3002/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+      const data = await api.login(email, password);
       
-      const data = await res.json();
-      
-      if (res.ok) {
-        localStorage.setItem('user', JSON.stringify(data.user));
-        onLogin(data.user);
-        navigate('/');
-      } else {
-        setError(data.error || 'Login failed');
-      }
+      localStorage.setItem('user', JSON.stringify(data.user));
+      onLogin(data.user);
+      navigate('/');
     } catch (err) {
-      setError('Connection error');
+      setError(err.message || 'Connection error');
     }
   };
 

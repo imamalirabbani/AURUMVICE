@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ShoppingCart, ArrowLeft, Star, Shield, Truck, RefreshCw } from 'lucide-react';
-import { api } from '../services/api';
+import { api, IMAGE_BASE_URL } from '../services/api';
 
 const ProductDetail = ({ onAddToCart }) => {
   const { id } = useParams();
@@ -30,7 +30,7 @@ const ProductDetail = ({ onAddToCart }) => {
   const getImgUrl = (url) => {
     if (!url) return 'https://via.placeholder.com/800x1000?text=AURUMVICE+Collection';
     if (url.startsWith('http')) return url;
-    return `http://localhost:3002${url}`;
+    return `${IMAGE_BASE_URL}${url}`;
   };
 
   const formatPrice = (price) => {

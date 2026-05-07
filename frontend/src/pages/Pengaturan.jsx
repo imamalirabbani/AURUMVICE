@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE = 'http://localhost:3002';
+import { BASE_URL, IMAGE_BASE_URL } from '../services/api';
+
+const API_BASE = IMAGE_BASE_URL;
+const API_URL = BASE_URL;
 
 const Pengaturan = ({ user, onLogout, onUpdateUser }) => {
     const [products, setProducts] = useState([]);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, User, Mail, Lock } from 'lucide-react';
+import { api } from '../services/api';
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -15,22 +16,11 @@ const Register = () => {
     setError('');
     
     try {
-      const res = await fetch('http://localhost:3002/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password })
-      });
-      
-      const data = await res.json();
-      
-      if (res.ok) {
-        setSuccess(true);
-        setTimeout(() => navigate('/login'), 2000);
-      } else {
-        setError(data.error || 'Registration failed');
-      }
+      await api.register(username, email, password);
+      setSuccess(true);
+      setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setError('Connection error');
+      setError(err.message || 'Registration failed');
     }
   };
 

@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
+import { IMAGE_BASE_URL } from '../services/api';
 
 const ProductCard = ({ product }) => {
   const getImgUrl = (url) => {
     if (!url) return 'https://via.placeholder.com/800x600?text=No+Image';
     if (url.startsWith('http')) return url;
-    return `http://localhost:3002${url}`;
+    return `${IMAGE_BASE_URL}${url}`;
   };
 
   const formatPrice = (price) => {

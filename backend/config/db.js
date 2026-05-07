@@ -60,13 +60,23 @@ async function initDatabase() {
     )`);
 
     // Insert default about content if empty
-    const { rows } = await p.query("SELECT * FROM about_content");
-    if (rows.length === 0) {
+    const { rows: aboutRows } = await p.query("SELECT * FROM about_content");
+    if (aboutRows.length === 0) {
         await p.query(`INSERT INTO about_content (section_key, title, description) VALUES 
             ('excellence', 'Excellence', 'We settle for nothing less than the best in every product we offer.'),
             ('integrity', 'Integrity', 'Transparency and trust are the foundations of our relationship with you.'),
             ('innovation', 'Innovation', 'Constantly seeking new ways to enhance your shopping experience.')
         `);
+    }
+
+    // Insert default admin user if empty
+    const { rows: userRows } = await p.query("SELECT * FROM users WHERE username = $1", ['admin']);
+    if (userRows.length === 0) {
+        await p.query(
+            "INSERT INTO users (username, email, password, address) VALUES ($1, $2, $3, $4)",
+            ['admin', 'admin@aurumvice.com', 'admin123', 'AURUMVICE HQ']
+        );
+        console.log("Default admin user created: admin / admin123");
     }
 }
 
