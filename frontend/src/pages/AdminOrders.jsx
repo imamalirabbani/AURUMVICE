@@ -167,6 +167,9 @@ const AdminOrders = () => {
                     <div className="client-info-mini">
                       <strong>{order.client_name}</strong>
                       <span>{order.phone_number}</span>
+                      {order.payment_proof_url && order.payment_status !== 'Paid' && (
+                        <span className="badge-proof-alert pulse">BUKTI BARU</span>
+                      )}
                     </div>
                   </td>
                   <td data-label="TOTAL">{formatPrice(order.total_amount)}</td>
