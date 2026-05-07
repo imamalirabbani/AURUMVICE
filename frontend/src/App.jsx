@@ -41,6 +41,10 @@ function App() {
   }, [fetchCart]);
 
 
+  const handleIntroComplete = useCallback(() => {
+    setShowIntro(false);
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem('user');
     setUser(null);
@@ -49,7 +53,7 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
-      {showIntro && <IntroAnimation onComplete={() => setShowIntro(false)} />}
+      {showIntro && <IntroAnimation onComplete={handleIntroComplete} />}
       <Navbar cartCount={cartCount} user={user} />
       <main className="main-content container">
         <Routes>
