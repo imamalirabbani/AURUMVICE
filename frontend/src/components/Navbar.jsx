@@ -59,6 +59,9 @@ const Navbar = ({ cartCount, user }) => {
         {isMenuOpen && (
           <>
             <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">BAG ({cartCount})</Link>
+            {user && (
+              <Link to="/my-orders" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PESANAN SAYA</Link>
+            )}
             {user ? (
               <Link to="/pengaturan" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PENGATURAN</Link>
             ) : (
@@ -101,6 +104,10 @@ const Navbar = ({ cartCount, user }) => {
               </div>
             )}
           </div>
+        )}
+
+        {user && (
+          <Link to="/my-orders" className="nav-link-brioni desktop-only">PESANAN SAYA</Link>
         )}
 
         <Link to="/cart" className="nav-link-brioni">

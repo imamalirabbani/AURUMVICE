@@ -109,6 +109,11 @@ export const api = {
         return handleResponse(res);
     },
 
+    async getUserOrders(userId) {
+        const res = await fetch(`${BASE_URL}/orders/user/${userId}`);
+        return handleResponse(res);
+    },
+
     async updateOrderStatus(id, status) {
         const res = await fetch(`${BASE_URL}/orders/${id}/status`, {
             method: 'PUT',

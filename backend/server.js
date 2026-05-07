@@ -372,6 +372,13 @@ app.get('/api/orders/:id', catchAsync(async (req, res) => {
     res.json({ ...orders[0], items, tracking_logs: trackingLogs });
 }));
 
+// Get all orders for a specific user
+app.get('/api/orders/user/:userId', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { rows } = await pool.query("SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC", [req.params.userId]);
+    res.json(rows);
+}));
+
 // Update order status (Admin)
 app.put('/api/orders/:id/status', catchAsync(async (req, res) => {
     const pool = await getPool();
