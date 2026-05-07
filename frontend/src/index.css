@@ -840,8 +840,23 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: 0.3rem;
   }
 
+  /* Force Mini Showcase on small phones */
   .product-grid {
-    grid-template-columns: repeat(1, 1fr); /* Optional: single column for very small devices */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .product-name-luxury {
+    font-size: 0.65rem;
+    letter-spacing: 0.02rem;
+  }
+
+  .product-category-luxury {
+    font-size: 0.5rem;
+  }
+
+  .product-price-luxury {
+    font-size: 0.6rem;
   }
   
   .btn {
