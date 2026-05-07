@@ -145,12 +145,19 @@ app.delete('/api/products/:id', catchAsync(async (req, res) => {
 // Update product
 app.put('/api/products/:id', upload.array('imageFiles', 5), catchAsync(async (req, res) => {
     const pool = await getPool();
+    const productId = parseInt(req.params.id);
     const { name, description, price, category } = req.body;
     
-    await pool.query(
+    console.log(`Updating product ${productId}...`);
+
+    const result = await pool.query(
         "UPDATE products SET name = $1, description = $2, price = $3, category = $4 WHERE id = $5",
-        [name, description, price, category, req.params.id]
+        [name, description, price, category, productId]
     );
+
+    if (result.rowCount === 0) {
+        return res.status(404).json({ error: "Product not found to update" });
+    }
 
     if (req.files && req.files.length > 0) {
         const imageUrls = [];
@@ -177,11 +184,11 @@ app.put('/api/products/:id', upload.array('imageFiles', 5), catchAsync(async (re
         }
 
         const mainImage = imageUrls[0];
-        await pool.query("UPDATE products SET image = $1 WHERE id = $2", [mainImage, req.params.id]);
-        await pool.query("DELETE FROM product_images WHERE product_id = $1", [req.params.id]);
+        await pool.query("UPDATE products SET image = $1 WHERE id = $2", [mainImage, productId]);
+        await pool.query("DELETE FROM product_images WHERE product_id = $1", [productId]);
         
         for (const url of imageUrls) {
-            await pool.query("INSERT INTO product_images (product_id, image_url) VALUES ($1, $2)", [req.params.id, url]);
+            await pool.query("INSERT INTO product_images (product_id, image_url) VALUES ($1, $2)", [productId, url]);
         }
     }
 
