@@ -863,6 +863,61 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0.8rem 1.5rem;
     font-size: 0.75rem;
   }
+
+  /* Mini Footer Mobile */
+  .footer-luxury {
+    padding: 3rem 0 2rem;
+    text-align: center;
+  }
+
+  .footer-top {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .luxury-logo {
+    font-size: 1.8rem;
+    letter-spacing: 0.3rem;
+  }
+
+  .luxury-tagline {
+    font-size: 0.6rem;
+  }
+
+  .footer-grid-luxury {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    text-align: left;
+  }
+
+  .footer-col-luxury h4 {
+    font-size: 0.7rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .footer-col-luxury a {
+    font-size: 0.75rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .footer-newsletter-luxury {
+    padding: 3rem 0;
+  }
+
+  .newsletter-content h3 {
+    font-size: 1.1rem;
+    letter-spacing: 0.2rem;
+  }
+
+  .newsletter-content p {
+    font-size: 0.75rem;
+  }
+
+  .footer-bottom-luxury {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
 }
 
 /* Mobile Menu Button & Side Panel */
