@@ -761,16 +761,22 @@ h1, h2, h3, h4, h5, h6 {
 
   /* Hero Section */
   .brioni-hero {
-    height: 60vh;
+    height: 70vh;
+  }
+
+  .brioni-hero-bg {
+    object-position: center center;
   }
 
   .brioni-hero-overlay {
-    padding: 4rem 0 !important;
+    padding: 3rem 1rem !important;
+    justify-content: center; /* Center vertically on mobile for better layout */
   }
 
   .brioni-hero-title {
-    font-size: 1.5rem;
-    letter-spacing: 0.3rem;
+    font-size: 1.8rem;
+    letter-spacing: 0.4rem;
+    margin-bottom: 1rem;
   }
 
   .brioni-search-container {
@@ -800,7 +806,8 @@ h1, h2, h3, h4, h5, h6 {
 
 
   .collection-header h2 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    letter-spacing: 0.3rem;
   }
 
   /* Product Detail */
