@@ -2144,4 +2144,94 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 0.4rem !important;
   }
 
+  /* Admin / Pengaturan Responsive */
+  .admin-container {
+    padding: 0 1.2rem;
+  }
+
+  .admin-container > div:first-child {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .admin-title {
+    font-size: 1.1rem !important;
+    letter-spacing: 0.15rem !important;
+    margin-bottom: 2rem !important;
+    text-align: left !important;
+  }
+
+  .admin-tabs {
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: 0.8rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .admin-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    font-size: 0.65rem !important;
+    letter-spacing: 0.1rem !important;
+    white-space: nowrap;
+    padding: 0.8rem 0.2rem !important;
+  }
+
+  .admin-product-list {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-table {
+    min-width: 450px; /* Ensure content doesn't get squashed */
+  }
+
+  .admin-table th, .admin-table td {
+    padding: 0.8rem 0.5rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .admin-list-img {
+    width: 35px;
+    height: 35px;
+  }
+
+  .admin-form {
+    gap: 1.5rem;
+  }
+
+  .form-group {
+    gap: 0.5rem;
+  }
+
+  .form-group label {
+    font-size: 0.6rem !important;
+    letter-spacing: 0.1rem !important;
+  }
+
+  .form-group input, 
+  .form-group textarea, 
+  .form-group select {
+    padding: 0.8rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .admin-submit-btn {
+    padding: 1rem !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.1rem !important;
+  }
+
+  .btn-edit, .btn-delete {
+    padding: 4px 10px !important;
+    font-size: 0.6rem !important;
+  }
+
 }
