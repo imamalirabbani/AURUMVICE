@@ -3141,3 +3141,133 @@ h1, h2, h3, h4, h5, h6 {
     grid-template-columns: 1fr;
   }
 }
+
+/* --- MOBILE OPTIMIZATION --- */
+
+@media (max-width: 768px) {
+  /* Navbar adjustments */
+  .navbar-brioni {
+    padding: 1rem 1.5rem;
+  }
+
+  .logo-brioni {
+    font-size: 1.2rem;
+  }
+
+  .nav-right-brioni {
+    gap: 15px;
+  }
+
+  /* Admin Orders Table to Card conversion */
+  .admin-orders-table {
+    display: block;
+  }
+
+  .admin-orders-table thead {
+    display: none; /* Hide headers on mobile */
+  }
+
+  .admin-orders-table tbody, 
+  .admin-orders-table tr, 
+  .admin-orders-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .admin-orders-table tr {
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    background: white;
+  }
+
+  .admin-orders-table td {
+    text-align: right;
+    padding: 8px 0;
+    border: none;
+    position: relative;
+    padding-left: 50%;
+  }
+
+  .admin-orders-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 50%;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .status-stack {
+    justify-content: flex-end;
+  }
+
+  /* Order Success / Invoice */
+  .success-card {
+    padding: 1.5rem;
+  }
+
+  .bank-details .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .account-number {
+    font-size: 1.2rem;
+  }
+
+  .invoice-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .invoice-details {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .invoice-table {
+    font-size: 0.8rem;
+  }
+
+  .invoice-table th:nth-child(2),
+  .invoice-table td:nth-child(2) {
+    display: none; /* Hide Qty column on tiny screens if needed, or keep it simple */
+  }
+
+  /* My Orders Cards */
+  .order-card-luxury {
+    padding: 1.5rem;
+  }
+
+  .order-main-info {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Product Cards */
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    padding: 10px !important;
+  }
+
+  .product-card-luxury .product-info h3 {
+    font-size: 0.85rem;
+  }
+
+  .product-card-luxury .price-lux {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

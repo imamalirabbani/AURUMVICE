@@ -138,10 +138,15 @@ const AdminOrders = () => {
             <tbody>
               {orders.map(order => (
                 <tr key={order.id} className={selectedOrder?.id === order.id ? 'selected' : ''}>
-                  <td>#{order.id.toString().padStart(4, '0')}</td>
-                  <td>{order.client_name}</td>
-                  <td>{formatPrice(order.total_amount)}</td>
-                  <td>
+                  <td data-label="ID">#{order.id.toString().padStart(6, '0')}</td>
+                  <td data-label="PELANGGAN">
+                    <div className="client-info-mini">
+                      <strong>{order.client_name}</strong>
+                      <span>{order.phone_number}</span>
+                    </div>
+                  </td>
+                  <td data-label="TOTAL">{formatPrice(order.total_amount)}</td>
+                  <td data-label="STATUS">
                     <div className="status-stack">
                       <span className={`status-badge ${(order.status || 'Pending').toLowerCase()}`}>
                         {getStatusIcon(order.status)} {order.status}
@@ -151,8 +156,8 @@ const AdminOrders = () => {
                       </span>
                     </div>
                   </td>
-                  <td>{new Date(order.created_at).toLocaleDateString('id-ID')}</td>
-                  <td>
+                  <td data-label="TANGGAL">{new Date(order.created_at).toLocaleDateString('id-ID')}</td>
+                  <td data-label="AKSI">
                     <div className="action-buttons">
                       <button className="btn-icon" onClick={() => setSelectedOrder(order)}>
                         <Eye size={18} />
