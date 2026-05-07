@@ -793,21 +793,41 @@ h1, h2, h3, h4, h5, h6 {
 
 
   /* Product Grid Mini (Applies to all mobile) */
+  /* Mini Showcase Grid */
   .product-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
+    gap: 10px !important; /* Smaller gap for mini look */
+    padding: 0 5px;
+  }
+
+  .product-card-luxury {
+    margin-bottom: 1rem;
+  }
+
+  .product-info-luxury {
+    padding: 0.8rem 0.2rem !important; /* Tighter padding */
   }
 
   .product-name-luxury {
-    font-size: 0.75rem !important;
+    font-size: 0.7rem !important;
+    letter-spacing: 0.05rem !important;
+    margin-bottom: 0.2rem !important;
+    line-height: 1.2 !important;
   }
 
   .product-category-luxury {
-    font-size: 0.6rem !important;
+    font-size: 0.55rem !important;
+    letter-spacing: 0.1rem !important;
+    margin-bottom: 0.2rem !important;
   }
 
   .product-price-luxury {
-    font-size: 0.7rem !important;
+    font-size: 0.65rem !important;
+    font-weight: 600 !important;
+  }
+
+  .product-image-wrapper {
+    aspect-ratio: 3/4; /* Slightly more vertical for luxury feel */
   }
 
 
