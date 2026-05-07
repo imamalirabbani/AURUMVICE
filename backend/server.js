@@ -552,6 +552,26 @@ app.get('/api/health', catchAsync(async (req, res) => {
     });
 }));
 
+app.get('/api/test-db', async (req, res) => {
+    const { Pool } = require('pg');
+    const testConfig = {
+        user: 'postgres.fhljkxnptsbiopncbmmg',
+        host: 'aws-1-ap-southeast-1.pooler.supabase.com',
+        database: 'postgres',
+        password: 'zdQrUSU/6AYepTz',
+        port: 6543,
+        ssl: { rejectUnauthorized: false }
+    };
+    const testPool = new Pool(testConfig);
+    try {
+        const result = await testPool.query('SELECT NOW()');
+        await testPool.end();
+        res.json({ success: true, time: result.rows[0].now });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message, stack: err.stack });
+    }
+});
+
 
 // Centralized Error Handler
 app.use((err, req, res, next) => {
