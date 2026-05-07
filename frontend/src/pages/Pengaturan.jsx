@@ -145,10 +145,11 @@ const Pengaturan = ({ user, onLogout, onUpdateUser }) => {
         setImageFiles([]);
         
         let previews = [];
+        const formatImg = (img) => img && img.startsWith('http') ? img : `${API_BASE}${img}`;
         if (product.images && product.images.length > 0) {
-            previews = product.images.map(img => `${API_BASE}${img}`);
+            previews = product.images.map(formatImg);
         } else if (product.image) {
-            previews = [`${API_BASE}${product.image}`];
+            previews = [formatImg(product.image)];
         }
         setImagePreviews(previews);
         
