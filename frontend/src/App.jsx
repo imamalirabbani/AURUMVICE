@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import Pengaturan from './pages/Pengaturan';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
+import AdminDashboard from './pages/AdminDashboard';
 import AdminOrders from './pages/AdminOrders';
 import MyOrders from './pages/MyOrders';
 import { api } from './services/api';
@@ -54,12 +55,16 @@ function App() {
     setUser(null);
   };
 
+  const isAdminPath = window.location.pathname.toLowerCase().includes('/admin');
+
   return (
     <Router>
       <ScrollToTop />
       {showIntro && <IntroAnimation onComplete={handleIntroComplete} />}
-      <Navbar cartCount={cartCount} user={user} />
-      <main className="main-content container">
+      
+      {!isAdminPath && <Navbar cartCount={cartCount} user={user} />}
+      
+      <main className={isAdminPath ? "admin-main" : "main-content container"}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -71,10 +76,12 @@ function App() {
           <Route path="/checkout" element={<Checkout user={user} onOrderComplete={fetchCart} />} />
           <Route path="/order-success/:id" element={<OrderSuccess />} />
           <Route path="/my-orders" element={<MyOrders user={user} />} />
-          <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard user={user} />} />
+          <Route path="/admin/orders" element={<AdminOrders user={user} />} />
         </Routes>
       </main>
-      <Footer />
+
+      {!isAdminPath && <Footer />}
     </Router>
   );
 }

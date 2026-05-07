@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { api, getImgUrl } from '../services/api';
 import { Package, Truck, CheckCircle, XCircle, Clock, Eye, Printer, MapPin, Send, Trash2 } from 'lucide-react';
 
-const AdminOrders = () => {
+import AdminLayout from '../components/AdminLayout';
+
+const AdminOrders = ({ user }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -140,7 +142,8 @@ const AdminOrders = () => {
   if (loading) return <div className="empty-state">Loading orders...</div>;
 
   return (
-    <div className="admin-orders-page">
+    <AdminLayout user={user}>
+      <div className="admin-orders-page">
       <div className="admin-header glass">
         <h1>MANAJEMEN PESANAN</h1>
         <p>Kelola dan pantau semua pesanan masuk</p>
@@ -366,6 +369,7 @@ const AdminOrders = () => {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 };
 
