@@ -229,12 +229,15 @@ app.use((err, req, res, next) => {
 });
 
 // Initialize and Start
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
     initDatabase().then(() => {
         app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
     }).catch(err => {
         console.error("Database initialization failed:", err);
     });
+} else if (process.env.VERCEL) {
+    // On Vercel, just init the DB (it's async but Vercel will handle the app export)
+    initDatabase().catch(err => console.error("Vercel DB Init Error:", err));
 }
 
 module.exports = app;
