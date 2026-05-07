@@ -3375,3 +3375,87 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
   }
 }
+
+/* --- ADMIN PAYMENT VERIFICATION --- */
+
+.admin-order-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #fcfcfc;
+  border: 1px solid #eee;
+}
+
+.detail-col h4 {
+  font-family: var(--header-font);
+  font-size: 0.8rem;
+  letter-spacing: 0.1rem;
+  margin-bottom: 1rem;
+  color: var(--accent-gold);
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+}
+
+.detail-col p {
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.payment-verification-box {
+  padding: 1rem;
+  background: white;
+  border: 1px solid #f0f0f0;
+}
+
+.admin-proof-img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  margin: 10px 0;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.admin-proof-img:hover {
+  transform: scale(1.02);
+}
+
+.verify-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-lux-small {
+  flex: 1;
+  padding: 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-lux-small.approve {
+  background: #27ae60;
+  color: white;
+}
+
+.btn-lux-small.reject {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-lux-small:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .admin-order-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

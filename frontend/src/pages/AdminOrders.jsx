@@ -33,6 +33,20 @@ const AdminOrders = () => {
     }
   };
 
+  const handleUpdatePaymentStatus = async (orderId, newStatus) => {
+    try {
+      await api.updatePaymentStatus(orderId, newStatus);
+      fetchOrders();
+      // Update selected order locally too
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder({ ...selectedOrder, payment_status: newStatus });
+      }
+      alert(`Pembayaran berhasil diubah menjadi: ${newStatus}`);
+    } catch (err) {
+      alert("Gagal update status pembayaran: " + err.message);
+    }
+  };
+
   const handleStatusUpdate = async (id, newStatus) => {
     try {
       await api.updateOrderStatus(id, newStatus);
@@ -200,29 +214,49 @@ const AdminOrders = () => {
                 </div>
               </div>
 
-              <div className="detail-group">
-                <label>Status Pembayaran</label>
-                <div className="status-updater">
-                  {['Unpaid', 'Pending Verification', 'Paid', 'Failed'].map(s => (
-                    <button 
-                      key={s} 
-                      className={`btn-status mini ${selectedOrder.payment_status === s ? 'active' : ''}`}
-                      onClick={() => handlePaymentStatusUpdate(selectedOrder.id, s)}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
+              <div className="admin-order-detail-grid">
+              <div className="detail-col">
+                <h4>Informasi Pelanggan</h4>
+                <p><strong>Nama:</strong> {selectedOrder.client_name}</p>
+                <p><strong>Alamat:</strong> {selectedOrder.shipping_address}</p>
+                <p><strong>PIC:</strong> {selectedOrder.pic_name}</p>
+                <p><strong>Telp:</strong> {selectedOrder.phone_number}</p>
+                <p><strong>Metode:</strong> {selectedOrder.payment_method}</p>
+                <p><strong>Total:</strong> {formatPrice(selectedOrder.total_amount)}</p>
               </div>
 
-              {selectedOrder.payment_proof_url && (
-                <div className="detail-group">
-                  <label>Bukti Transfer</label>
-                  <div className="proof-preview">
-                    <img src={selectedOrder.payment_proof_url} alt="Proof of Payment" onClick={() => window.open(selectedOrder.payment_proof_url, '_blank')} />
-                  </div>
+              <div className="detail-col">
+                <h4>Verifikasi Pembayaran</h4>
+                <div className="payment-verification-box">
+                  <p>Status: <span className={`status-badge mini ${selectedOrder.payment_status.toLowerCase().replace(/\s+/g, '-')}`}>{selectedOrder.payment_status}</span></p>
+                  
+                  {selectedOrder.payment_proof_url ? (
+                    <div className="proof-preview-admin">
+                      <p>Bukti Transfer:</p>
+                      <a href={selectedOrder.payment_proof_url} target="_blank" rel="noreferrer">
+                        <img src={selectedOrder.payment_proof_url} alt="Bukti Pembayaran" className="admin-proof-img" />
+                      </a>
+                      <div className="verify-actions">
+                        <button 
+                          className="btn-lux-small approve" 
+                          onClick={() => handleUpdatePaymentStatus(selectedOrder.id, 'Paid')}
+                        >
+                          TERIMA PEMBAYARAN
+                        </button>
+                        <button 
+                          className="btn-lux-small reject" 
+                          onClick={() => handleUpdatePaymentStatus(selectedOrder.id, 'Failed')}
+                        >
+                          TOLAK
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="notif-empty">Belum ada bukti transfer diunggah.</div>
+                  )}
                 </div>
-              )}
+              </div>
+            </div>
 
               <div className="detail-group">
                 <label>Info Resi Pengiriman</label>
@@ -276,41 +310,24 @@ const AdminOrders = () => {
                 </div>
               </div>
 
-              <div className="info-grid">
-                <div className="info-item">
-                  <label>Client</label>
-                  <span>{selectedOrder.client_name}</span>
-                </div>
-                <div className="info-item">
-                  <label>PIC</label>
-                  <span>{selectedOrder.pic_name}</span>
-                </div>
-                <div className="info-item">
-                  <label>Phone</label>
-                  <span>{selectedOrder.phone_number}</span>
-                </div>
-                <div className="info-item">
-                  <label>Payment</label>
-                  <span>{selectedOrder.payment_method}</span>
-                </div>
-              </div>
-
-              <div className="address-item">
+              <div className="detail-group">
                 <label>Alamat Pengiriman</label>
                 <p>{selectedOrder.shipping_address}</p>
               </div>
 
-              <div className="items-list">
+              <div className="detail-group">
                 <label>Daftar Barang</label>
-                {selectedOrder.items.map((item, idx) => (
-                  <div key={idx} className="order-item-row">
-                    <span>{item.name} (x{item.quantity})</span>
-                    <span>{formatPrice(item.price_at_purchase * item.quantity)}</span>
+                <div className="items-list">
+                  {selectedOrder.items.map((item, idx) => (
+                    <div key={idx} className="order-item-row">
+                      <span>{item.name} (x{item.quantity})</span>
+                      <span>{formatPrice(item.price_at_purchase * item.quantity)}</span>
+                    </div>
+                  ))}
+                  <div className="order-total-row">
+                    <span>TOTAL</span>
+                    <span>{formatPrice(selectedOrder.total_amount)}</span>
                   </div>
-                ))}
-                <div className="order-total-row">
-                  <span>TOTAL</span>
-                  <span>{formatPrice(selectedOrder.total_amount)}</span>
                 </div>
               </div>
             </div>
