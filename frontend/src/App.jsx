@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -19,7 +19,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [showIntro, setShowIntro] = useState(true);
 
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
       const data = await api.getCart();
       const count = data.reduce((acc, item) => acc + item.quantity, 0);
@@ -27,15 +27,18 @@ function App() {
     } catch (err) {
       console.error("Failed to fetch cart", err);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchCart();
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-  }, []);
+    const initializeApp = async () => {
+      await fetchCart();
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+      }
+    };
+    initializeApp();
+  }, [fetchCart]);
 
 
   const handleLogout = () => {
@@ -47,7 +50,7 @@ function App() {
     <Router>
       <ScrollToTop />
       {showIntro && <IntroAnimation onComplete={() => setShowIntro(false)} />}
-      <Navbar cartCount={cartCount} user={user} onLogout={handleLogout} />
+      <Navbar cartCount={cartCount} user={user} />
       <main className="main-content container">
         <Routes>
           <Route path="/" element={<Home />} />
