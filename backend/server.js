@@ -83,8 +83,15 @@ async function setupDatabase() {
             id INT AUTO_INCREMENT PRIMARY KEY,
             username VARCHAR(255) UNIQUE NOT NULL,
             email VARCHAR(255) UNIQUE NOT NULL,
-            password VARCHAR(255) NOT NULL
+            password VARCHAR(255) NOT NULL,
+            address TEXT
         )`);
+
+        // Check if address column exists, if not add it (for existing databases)
+        const [userCols] = await pool.query("SHOW COLUMNS FROM users LIKE 'address'");
+        if (userCols.length === 0) {
+            await pool.query("ALTER TABLE users ADD COLUMN address TEXT");
+        }
 
         await pool.query(`CREATE TABLE IF NOT EXISTS product_images (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -315,7 +322,7 @@ app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const [rows] = await pool.query(
-            "SELECT id, username, email FROM users WHERE email = ? AND password = ?",
+            "SELECT id, username, email, address FROM users WHERE email = ? AND password = ?",
             [email, password]
         );
         
@@ -323,6 +330,31 @@ app.post('/api/login', async (req, res) => {
             return res.status(401).json({ error: "Invalid credentials" });
         }
         res.json({ message: "Login successful", user: rows[0] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get user details
+app.get('/api/users/:id', async (req, res) => {
+    try {
+        const [rows] = await pool.query("SELECT id, username, email, address FROM users WHERE id = ?", [req.params.id]);
+        if (rows.length === 0) return res.status(404).json({ error: "User not found" });
+        res.json(rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Update user details
+app.put('/api/users/:id', async (req, res) => {
+    try {
+        const { username, email, address } = req.body;
+        await pool.query(
+            "UPDATE users SET username = ?, email = ?, address = ? WHERE id = ?",
+            [username, email, address, req.params.id]
+        );
+        res.json({ message: "Profile updated successfully" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

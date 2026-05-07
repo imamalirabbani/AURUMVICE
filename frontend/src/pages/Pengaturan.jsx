@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const API_BASE = 'http://localhost:3002';
 
-const Pengaturan = ({ user, onLogout }) => {
+const Pengaturan = ({ user, onLogout, onUpdateUser }) => {
     const [products, setProducts] = useState([]);
     const [activeTab, setActiveTab] = useState(user?.username === 'admin' ? 'list' : 'account');
     const [name, setName] = useState('');
@@ -20,6 +20,14 @@ const Pengaturan = ({ user, onLogout }) => {
         integrity: { title: 'Integrity', description: '' },
         innovation: { title: 'Innovation', description: '' }
     });
+    
+    // User profile states
+    const [userProfile, setUserProfile] = useState({
+        username: user?.username || '',
+        email: user?.email || '',
+        address: user?.address || ''
+    });
+
     const navigate = useNavigate();
 
     const fetchProducts = useCallback(async () => {
@@ -47,6 +55,23 @@ const Pengaturan = ({ user, onLogout }) => {
         }
     }, []);
 
+    const fetchUserProfile = useCallback(async () => {
+        if (!user?.id) return;
+        try {
+            const res = await fetch(`${API_BASE}/api/users/${user.id}`);
+            if (res.ok) {
+                const data = await res.json();
+                setUserProfile({
+                    username: data.username,
+                    email: data.email,
+                    address: data.address || ''
+                });
+            }
+        } catch (err) {
+            console.error("Failed to fetch user profile", err);
+        }
+    }, [user?.id]);
+
     useEffect(() => {
         if (!user) {
             navigate('/login');
@@ -56,7 +81,8 @@ const Pengaturan = ({ user, onLogout }) => {
             fetchProducts();
             fetchAboutContent();
         }
-    }, [user, navigate, fetchProducts]);
+        fetchUserProfile();
+    }, [user, navigate, fetchProducts, fetchAboutContent, fetchUserProfile]);
 
     useEffect(() => {
         // Cleanup object URLs on unmount to prevent memory leaks
@@ -181,6 +207,30 @@ const Pengaturan = ({ user, onLogout }) => {
         }
     };
 
+    const handleProfileUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await fetch(`${API_BASE}/api/users/${user.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userProfile)
+            });
+
+            if (res.ok) {
+                showTemporaryMessage('Profile updated successfully!');
+                // Update local storage and global state if needed
+                const updatedUser = { ...user, ...userProfile };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                if (onUpdateUser) onUpdateUser(updatedUser);
+            } else {
+                const data = await res.json().catch(() => ({}));
+                showTemporaryMessage(`Error: ${data.error || 'Failed to update profile'}`);
+            }
+        } catch (err) {
+            showTemporaryMessage(`Error: ${err.message}`);
+        }
+    };
+
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this product?')) return;
 
@@ -231,6 +281,24 @@ const Pengaturan = ({ user, onLogout }) => {
 
     return (
         <div className="admin-container">
+            <div style={{ marginBottom: '2rem' }}>
+                <button 
+                    onClick={() => navigate(-1)} 
+                    style={{ 
+                        background: 'transparent', 
+                        border: 'none', 
+                        fontSize: '0.7rem', 
+                        letterSpacing: '0.2rem', 
+                        cursor: 'pointer',
+                        color: 'var(--text-secondary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                    }}
+                >
+                    ← KEMBALI
+                </button>
+            </div>
             <h1 className="admin-title">PENGATURAN</h1>
             
             <div className="admin-tabs">
@@ -267,19 +335,59 @@ const Pengaturan = ({ user, onLogout }) => {
             {message && <div className={`message ${message.includes('Error') ? 'error' : 'success'}`}>{message}</div>}
             
             {activeTab === 'account' && (
-                <section className="admin-section fade-in text-center">
-                    <div className="account-info" style={{ marginBottom: '3rem' }}>
-                        <p style={{ letterSpacing: '0.1rem', color: '#666', marginBottom: '0.5rem' }}>LOGGED IN AS</p>
-                        <h2 style={{ fontSize: '1.5rem', letterSpacing: '0.3rem' }}>{user?.username.toUpperCase()}</h2>
-                        <p style={{ color: '#999', fontSize: '0.8rem', marginTop: '0.5rem' }}>{user?.email}</p>
+                <section className="admin-section fade-in">
+                    <form onSubmit={handleProfileUpdate} className="admin-form">
+                        <div className="form-group">
+                            <label>USERNAME</label>
+                            <input 
+                                type="text" 
+                                value={userProfile.username} 
+                                onChange={(e) => setUserProfile({...userProfile, username: e.target.value})} 
+                                required 
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>EMAIL</label>
+                            <input 
+                                type="email" 
+                                value={userProfile.email} 
+                                onChange={(e) => setUserProfile({...userProfile, email: e.target.value})} 
+                                required 
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>ALAMAT</label>
+                            <textarea 
+                                value={userProfile.address} 
+                                onChange={(e) => setUserProfile({...userProfile, address: e.target.value})} 
+                                placeholder="Masukkan alamat lengkap"
+                                rows="3"
+                            />
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button type="submit" className="admin-submit-btn" style={{ flex: 2 }}>
+                                Update Profil
+                            </button>
+                            <button 
+                                type="button" 
+                                onClick={() => navigate(-1)} 
+                                className="admin-submit-btn" 
+                                style={{ flex: 1, background: 'transparent', color: '#000' }}
+                            >
+                                KEMBALI
+                            </button>
+                        </div>
+                    </form>
+
+                    <div style={{ marginTop: '4rem', borderTop: '1px solid #eee', paddingTop: '2rem' }} className="text-center">
+                        <button 
+                            onClick={handleLogoutClick} 
+                            className="admin-submit-btn" 
+                            style={{ maxWidth: '300px', margin: '0 auto', background: 'transparent', color: '#000' }}
+                        >
+                            LOGOUT
+                        </button>
                     </div>
-                    <button 
-                        onClick={handleLogoutClick} 
-                        className="admin-submit-btn" 
-                        style={{ maxWidth: '300px', margin: '0 auto' }}
-                    >
-                        LOGOUT
-                    </button>
                 </section>
             )}
 

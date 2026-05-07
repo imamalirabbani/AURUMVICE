@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import IntroAnimation from './components/IntroAnimation';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -43,6 +44,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       {showIntro && <IntroAnimation onComplete={() => setShowIntro(false)} />}
       <Navbar cartCount={cartCount} user={user} onLogout={handleLogout} />
       <main className="main-content container">
@@ -53,7 +55,7 @@ function App() {
           <Route path="/product/:id" element={<ProductDetail onAddToCart={fetchCart} />} />
           <Route path="/login" element={<Login onLogin={setUser} />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/pengaturan" element={<Pengaturan user={user} onLogout={handleLogout} />} />
+          <Route path="/pengaturan" element={<Pengaturan user={user} onLogout={handleLogout} onUpdateUser={setUser} />} />
         </Routes>
       </main>
       <Footer />
