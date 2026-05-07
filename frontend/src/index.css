@@ -761,16 +761,16 @@ h1, h2, h3, h4, h5, h6 {
 
   /* Hero Section */
   .brioni-hero {
-    height: 70vh;
+    height: 85vh; /* Much taller to accommodate portrait images */
   }
 
   .brioni-hero-bg {
-    object-position: center center;
+    object-position: center 15%; /* Focus more on the top-center part */
   }
 
   .brioni-hero-overlay {
-    padding: 3rem 1rem !important;
-    justify-content: center; /* Center vertically on mobile for better layout */
+    padding: 2rem 1rem 4rem !important; /* Adjust padding for bottom-aligned text */
+    justify-content: flex-end; 
   }
 
   .brioni-hero-title {
