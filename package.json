@@ -1,0 +1,14 @@
+{
+  "name": "aurumvice-monorepo",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "install-backend": "cd backend && npm install"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "cors": "^2.8.6",
+    "multer": "^2.1.1",
+    "pg": "^8.20.0"
+  }
+}
