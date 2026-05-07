@@ -14,27 +14,15 @@ const PORT = process.env.PORT || 3002;
 app.use(cors());
 app.use(express.json());
 
-// Setup uploads folder
-const uploadDir = process.env.VERCEL 
-    ? '/tmp' 
-    : path.join(__dirname, 'uploads');
-
+// Setup uploads folder (local dev only)
+const uploadDir = path.join(__dirname, 'uploads');
 if (!process.env.VERCEL && !fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
-
-// Static serve for uploads
 app.use('/uploads', express.static(uploadDir));
 
-// Multer storage configuration
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir),
-    filename: (req, file, cb) => {
-        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-        cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
-    }
-});
-const upload = multer({ storage });
+// Multer: use memory storage so it works on Vercel (serverless)
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Wrapper for async routes to catch errors
 const catchAsync = (fn) => (req, res, next) => {
@@ -100,22 +88,21 @@ app.post('/api/products', upload.array('imageFiles', 5), catchAsync(async (req, 
 
             const { data, error } = await supabase.storage
                 .from('product-images')
-                .upload(filePath, fs.readFileSync(file.path), {
+                .upload(filePath, file.buffer, {
                     contentType: file.mimetype,
                     upsert: true
                 });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase upload error:', error);
+                throw new Error(`Upload failed: ${error.message}`);
+            }
 
             const { data: publicUrlData } = supabase.storage
                 .from('product-images')
                 .getPublicUrl(filePath);
             
-            const publicUrl = publicUrlData.publicUrl;
-            imageUrls.push(publicUrl);
-            
-            // Clean up local temp file
-            if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+            imageUrls.push(publicUrlData.publicUrl);
         }
         mainImage = imageUrls[0];
     }
@@ -168,19 +155,21 @@ app.put('/api/products/:id', upload.array('imageFiles', 5), catchAsync(async (re
 
             const { data, error } = await supabase.storage
                 .from('product-images')
-                .upload(filePath, fs.readFileSync(file.path), {
+                .upload(filePath, file.buffer, {
                     contentType: file.mimetype,
                     upsert: true
                 });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase upload error:', error);
+                throw new Error(`Upload failed: ${error.message}`);
+            }
 
             const { data: publicUrlData } = supabase.storage
                 .from('product-images')
                 .getPublicUrl(filePath);
             
             imageUrls.push(publicUrlData.publicUrl);
-            if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
         }
 
         const mainImage = imageUrls[0];
