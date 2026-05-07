@@ -9,11 +9,12 @@ const Navbar = ({ cartCount, user }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Aggressive check: if 'admin' appears anywhere in the URL path
   const isAdminPath = /admin/i.test(location.pathname);
+  const isAdminUser = user && user.email === 'admin@aurumvice.com';
+  const isHideLinks = isAdminPath || isAdminUser;
 
   useEffect(() => {
-    if (user && !isAdminPath) {
+    if (user && !isHideLinks) {
       const fetchNotifications = async () => {
         try {
           const data = await api.getNotifications(user.id);
@@ -62,7 +63,7 @@ const Navbar = ({ cartCount, user }) => {
         
         {isMenuOpen && (
           <div className="mobile-nav-links">
-            {isAdminPath ? (
+            {isHideLinks ? (
               /* ADMIN MOBILE */
               <>
                 {user ? (
@@ -94,7 +95,7 @@ const Navbar = ({ cartCount, user }) => {
       </div>
 
       <div className="navbar-right desktop-only">
-        {isAdminPath ? (
+        {isHideLinks ? (
           /* ADMIN DESKTOP */
           <>
             {user ? (
