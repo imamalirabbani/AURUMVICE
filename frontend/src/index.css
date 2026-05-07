@@ -3271,3 +3271,107 @@ h1, h2, h3, h4, h5, h6 {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* --- ORDER SUCCESS MOBILE REFINEMENT --- */
+
+@media (max-width: 768px) {
+  .order-success-page {
+    padding: 2rem 10px;
+  }
+
+  .success-card {
+    padding: 1.5rem 1rem !important;
+    border-radius: 0 !important; /* Full width mobile feel */
+  }
+
+  .success-header h1 {
+    font-size: 1.5rem;
+  }
+
+  /* Bank Info Card Refinement */
+  .bank-info-card {
+    background: #fdfbf7;
+    border: 1px solid var(--accent-gold);
+    padding: 1.5rem !important;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+  }
+
+  .bank-details .detail-row label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .bank-details .detail-row span {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .account-number {
+    font-size: 1.4rem !important;
+    color: var(--accent-gold);
+    letter-spacing: 2px;
+    margin: 5px 0;
+  }
+
+  /* Upload Form */
+  .payment-upload-form {
+    padding: 1.5rem;
+    background: white;
+    border: 1px solid #eee;
+  }
+
+  .upload-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  /* Invoice Refinement */
+  .invoice-container {
+    padding: 1.5rem 1rem !important;
+    margin-top: 2rem;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  }
+
+  .invoice-header .brand {
+    font-size: 1.2rem;
+  }
+
+  .invoice-details {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+  }
+
+  .invoice-table thead {
+    display: none;
+  }
+
+  .invoice-table tr {
+    display: block;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 10px 0;
+  }
+
+  .invoice-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border: none !important;
+  }
+
+  .invoice-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .invoice-table tfoot td {
+    justify-content: space-between;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+}

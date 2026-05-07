@@ -182,10 +182,10 @@ const OrderSuccess = () => {
             <tbody>
               {order.items.map((item, index) => (
                 <tr key={index}>
-                  <td>{item.name}</td>
-                  <td>{item.quantity}</td>
-                  <td>{formatPrice(item.price_at_purchase)}</td>
-                  <td>{formatPrice(item.price_at_purchase * item.quantity)}</td>
+                  <td data-label="Produk">{item.name}</td>
+                  <td data-label="Qty">{item.quantity}</td>
+                  <td data-label="Harga">{formatPrice(item.price_at_purchase)}</td>
+                  <td data-label="Subtotal">{formatPrice(item.price_at_purchase * item.quantity)}</td>
                 </tr>
               ))}
             </tbody>
