@@ -77,15 +77,9 @@ const About = () => {
           <p style={{ maxWidth: '500px', margin: '0 auto 1rem', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
             We are more than just a store; we are a lifestyle movement. Step into the world of uncompromising quality.
           </p>
-          <div style={{ marginBottom: '3rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
-            <div>
-              <p style={{ fontSize: '0.7rem', letterSpacing: '0.1rem', textTransform: 'uppercase', color: '#888', marginBottom: '0.3rem' }}>Email Inquiries</p>
-              <a href="mailto:imamalirabbani@gmail.com" style={{ color: '#000', fontSize: '1.1rem', textDecoration: 'none', borderBottom: '1px solid #000', paddingBottom: '2px' }}>imamalirabbani@gmail.com</a>
-            </div>
-            <div>
-              <p style={{ fontSize: '0.7rem', letterSpacing: '0.1rem', textTransform: 'uppercase', color: '#888', marginBottom: '0.3rem' }}>Direct Contact</p>
-              <a href="tel:+6285182235662" style={{ color: '#000', fontSize: '1.1rem', textDecoration: 'none', borderBottom: '1px solid #000', paddingBottom: '2px' }}>+62 851-8223-5662</a>
-            </div>
+          <div style={{ marginBottom: '3rem' }}>
+            <p style={{ fontSize: '0.8rem', letterSpacing: '0.1rem', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>Customer Inquiries</p>
+            <a href="mailto:imamalirabbani@gmail.com" style={{ color: '#000', fontSize: '1.1rem', textDecoration: 'none', borderBottom: '1px solid #000', paddingBottom: '2px' }}>imamalirabbani@gmail.com</a>
           </div>
           <button className="btn btn-primary" style={{ padding: '15px 40px' }} onClick={() => navigate('/')}>EXPLORE COLLECTION</button>
         </section>
