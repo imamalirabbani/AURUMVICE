@@ -17,7 +17,15 @@ import './index.css';
 function App() {
   const [cartCount, setCartCount] = useState(0);
   const [user, setUser] = useState(null);
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(() => {
+    // Only show if it hasn't been seen in this session
+    return !sessionStorage.getItem('introSeen');
+  });
+
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+    sessionStorage.setItem('introSeen', 'true');
+  };
 
   const fetchCart = useCallback(async () => {
     try {
@@ -49,7 +57,7 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
-      {showIntro && <IntroAnimation onComplete={() => setShowIntro(false)} />}
+      {showIntro && <IntroAnimation onComplete={handleIntroComplete} />}
       <Navbar cartCount={cartCount} user={user} />
       <main className="main-content container">
         <Routes>
