@@ -29,8 +29,20 @@ const ProductDetail = ({ onAddToCart }) => {
 
   const getImgUrl = (url) => {
     if (!url) return 'https://via.placeholder.com/800x1000?text=AURUMVICE+Collection';
-    if (url.startsWith('http')) return url;
-    return `${IMAGE_BASE_URL}${url}`;
+    
+    // Fix malformed URLs like "https//..." (missing colon)
+    let cleanUrl = url;
+    if (url.startsWith('https//')) {
+      cleanUrl = url.replace('https//', 'https://');
+    } else if (url.startsWith('http//')) {
+      cleanUrl = url.replace('http//', 'http://');
+    }
+
+    if (cleanUrl.startsWith('http')) return cleanUrl;
+    
+    // Ensure relative paths start with /
+    const separator = cleanUrl.startsWith('/') ? '' : '/';
+    return `${IMAGE_BASE_URL}${separator}${cleanUrl}`;
   };
 
   const formatPrice = (price) => {
