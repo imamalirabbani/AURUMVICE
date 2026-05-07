@@ -3459,3 +3459,32 @@ h1, h2, h3, h4, h5, h6 {
     grid-template-columns: 1fr;
   }
 }
+
+/* --- ADMIN FEEDBACK STYLES --- */
+
+.feedback-selector {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.feedback-selector label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.lux-select-mini {
+  width: 100%;
+  padding: 8px;
+  font-size: 0.8rem;
+  border: 1px solid var(--border-color);
+  background: white;
+  font-family: var(--body-font);
+  outline: none;
+}
+
+.lux-select-mini:focus {
+  border-color: var(--accent-gold);
+}

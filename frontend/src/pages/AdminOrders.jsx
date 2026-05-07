@@ -8,6 +8,7 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [trackingInfo, setTrackingInfo] = useState({ tracking_number: '', shipping_courier: 'JNE' });
   const [newLog, setNewLog] = useState({ status_update: '', location: '' });
+  const [feedbackMessage, setFeedbackMessage] = useState('Pembayaran Berhasil! Pesanan Anda sedang kami proses.');
 
   useEffect(() => {
     fetchOrders();
@@ -36,12 +37,21 @@ const AdminOrders = () => {
   const handleUpdatePaymentStatus = async (orderId, newStatus) => {
     try {
       await api.updatePaymentStatus(orderId, newStatus);
-      fetchOrders();
-      // Update selected order locally too
-      if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, payment_status: newStatus });
+      
+      // If approved, also add a tracking log with the selected feedback
+      if (newStatus === 'Paid') {
+        await api.addTrackingLog(orderId, {
+          status_update: feedbackMessage,
+          location: 'HQ AURUMVICE'
+        });
       }
-      alert(`Pembayaran berhasil diubah menjadi: ${newStatus}`);
+
+      fetchOrders();
+      if (selectedOrder && selectedOrder.id === orderId) {
+        const updated = await api.getOrder(orderId);
+        setSelectedOrder(updated);
+      }
+      alert(`Status pembayaran berhasil diperbarui.`);
     } catch (err) {
       alert("Gagal update status pembayaran: " + err.message);
     }
@@ -236,12 +246,25 @@ const AdminOrders = () => {
                       <a href={selectedOrder.payment_proof_url} target="_blank" rel="noreferrer">
                         <img src={selectedOrder.payment_proof_url} alt="Bukti Pembayaran" className="admin-proof-img" />
                       </a>
+                      <div className="feedback-selector">
+                        <label>Informasi untuk Client:</label>
+                        <select 
+                          value={feedbackMessage} 
+                          onChange={(e) => setFeedbackMessage(e.target.value)}
+                          className="lux-select-mini"
+                        >
+                          <option value="Pembayaran Berhasil! Pesanan Anda sedang kami proses.">Pembayaran Berhasil (Default)</option>
+                          <option value="Pembayaran Diterima! Produk akan segera kami buatkan (Pre-Order).">Produk Akan Dibuatkan (Pre-Order)</option>
+                          <option value="Pembayaran Sukses! Mohon tunggu, produk sedang disiapkan untuk pengiriman.">Sukses, Tunggu Pengiriman</option>
+                        </select>
+                      </div>
+
                       <div className="verify-actions">
                         <button 
                           className="btn-lux-small approve" 
                           onClick={() => handleUpdatePaymentStatus(selectedOrder.id, 'Paid')}
                         >
-                          TERIMA PEMBAYARAN
+                          TERIMA & KIRIM NOTIF
                         </button>
                         <button 
                           className="btn-lux-small reject" 
