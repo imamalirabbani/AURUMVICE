@@ -27,9 +27,7 @@ app.use(async (req, res, next) => {
         } catch (err) {
             console.error("Database Init Error:", err);
             res.status(500).json({ 
-                error: "Database Initialization Failed", 
-                message: err.message,
-                stack: err.stack 
+                error: "Database Initialization Failed"
             });
         }
     } else {
@@ -530,56 +528,11 @@ app.put('/api/notifications/read-all/:userId', catchAsync(async (req, res) => {
 }));
 
 
-// --- Admin / Failsafe Routes ---
-
-app.get('/api/admin/migrate', catchAsync(async (req, res) => {
-    try {
-        await initDatabase();
-        isDbInitialized = true;
-        res.json({ message: "Migration triggered successfully" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}));
-
-app.get('/api/health', catchAsync(async (req, res) => {
-    const pool = await getPool();
-    const { rows } = await pool.query("SELECT 1 as connected");
-    res.json({ 
-        status: "ok", 
-        database: rows[0].connected === 1 ? "connected" : "error",
-        isDbInitialized 
-    });
-}));
-
-app.get('/api/test-db', async (req, res) => {
-    const { Pool } = require('pg');
-    const testConfig = {
-        user: 'postgres.fhljkxnptsbiopncbmmg',
-        host: 'aws-1-ap-southeast-1.pooler.supabase.com',
-        database: 'postgres',
-        password: 'zdQrUSU/6AYepTz',
-        port: 6543,
-        ssl: { rejectUnauthorized: false }
-    };
-    const testPool = new Pool(testConfig);
-    try {
-        const result = await testPool.query('SELECT NOW()');
-        await testPool.end();
-        res.json({ success: true, time: result.rows[0].now });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message, stack: err.stack });
-    }
-});
-
-
 // Centralized Error Handler
 app.use((err, req, res, next) => {
     console.error("Server Error:", err.message);
     res.status(500).json({ 
-        error: err.message || "Internal Server Error",
-        stack: err.stack,
-        details: "Detailed error for debugging"
+        error: err.message || "Internal Server Error"
     });
 });
 
