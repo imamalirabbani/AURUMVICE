@@ -470,6 +470,17 @@ app.put('/api/orders/:id/payment-status', catchAsync(async (req, res) => {
     res.json({ message: "Payment status updated" });
 }));
 
+// Delete Order (Admin Only)
+app.get('/api/orders/:id', catchAsync(async (req, res) => {
+    // This is the existing GET route, I'll add the DELETE route after it
+}));
+
+app.delete('/api/orders/:id', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    // Items will be deleted automatically due to ON DELETE CASCADE on order_id
+    await pool.query("DELETE FROM orders WHERE id = $1", [req.params.id]);
+    res.json({ message: "Order deleted successfully" });
+}));
 
 // --- Tracking Routes ---
 

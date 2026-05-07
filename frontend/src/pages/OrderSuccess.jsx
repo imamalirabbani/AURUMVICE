@@ -206,12 +206,6 @@ const OrderSuccess = () => {
         </div>
 
         <div className="success-actions no-print">
-          <button className="btn btn-secondary" onClick={handlePrint}>
-            <Printer size={18} /> Cetak Invoice
-          </button>
-          <button className="btn btn-secondary" onClick={handlePrint}>
-            <Download size={18} /> Simpan PDF
-          </button>
           <Link to="/" className="btn btn-primary">
             <ShoppingBag size={18} /> Lanjut Belanja
           </Link>

@@ -142,6 +142,13 @@ export const api = {
         return handleResponse(res);
     },
 
+    async deleteOrder(id) {
+        const res = await fetch(`${BASE_URL}/orders/${id}`, {
+            method: 'DELETE'
+        });
+        return handleResponse(res);
+    },
+
     // Notifications
     async getNotifications(userId) {
         const res = await fetch(`${BASE_URL}/notifications/${userId}`);

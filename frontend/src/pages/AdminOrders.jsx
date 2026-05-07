@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { Package, Truck, CheckCircle, XCircle, Clock, Eye, Printer, MapPin, Send } from 'lucide-react';
+import { Package, Truck, CheckCircle, XCircle, Clock, Eye, Printer, MapPin, Send, Trash2 } from 'lucide-react';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -58,6 +58,20 @@ const AdminOrders = () => {
     } catch (err) {
       console.error(err);
       alert("Gagal update status pembayaran");
+    }
+  };
+
+  const handleDeleteOrder = async (orderId) => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus pesanan ini secara permanen?")) {
+      try {
+        await api.deleteOrder(orderId);
+        fetchOrders();
+        if (selectedOrder && selectedOrder.id === orderId) {
+          setSelectedOrder(null);
+        }
+      } catch (err) {
+        alert("Gagal menghapus pesanan: " + err.message);
+      }
     }
   };
 
@@ -139,9 +153,14 @@ const AdminOrders = () => {
                   </td>
                   <td>{new Date(order.created_at).toLocaleDateString('id-ID')}</td>
                   <td>
-                    <button className="btn-icon" onClick={() => setSelectedOrder(order)}>
-                      <Eye size={18} />
-                    </button>
+                    <div className="action-buttons">
+                      <button className="btn-icon" onClick={() => setSelectedOrder(order)}>
+                        <Eye size={18} />
+                      </button>
+                      <button className="btn-icon" style={{ color: '#e74c3c' }} onClick={() => handleDeleteOrder(order.id)}>
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
