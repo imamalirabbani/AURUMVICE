@@ -14,6 +14,22 @@ const PORT = process.env.PORT || 3002;
 app.use(cors());
 app.use(express.json());
 
+// Initialize DB for Serverless Environment (Vercel)
+let isDbInitialized = false;
+app.use(async (req, res, next) => {
+    if (process.env.VERCEL && !isDbInitialized) {
+        try {
+            console.log("Lazy initializing database on Vercel...");
+            await initDatabase();
+            isDbInitialized = true;
+            console.log("Database initialized successfully on Vercel");
+        } catch (err) {
+            console.error("Lazy DB Init Error:", err);
+        }
+    }
+    next();
+});
+
 // Setup uploads folder (local dev only)
 const uploadDir = path.join(__dirname, 'uploads');
 if (!process.env.VERCEL && !fs.existsSync(uploadDir)) {
@@ -516,17 +532,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-let isDbInitialized = false;
-app.use(async (req, res, next) => {
-    if (process.env.VERCEL && !isDbInitialized) {
-        try {
-            await initDatabase();
-            isDbInitialized = true;
-        } catch (err) {
-            console.error("Lazy DB Init Error:", err);
-        }
-    }
-    next();
+    });
 });
 
 // Initialize and Start
