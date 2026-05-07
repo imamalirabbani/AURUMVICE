@@ -224,8 +224,11 @@ app.put('/api/about', catchAsync(async (req, res) => {
 
 // Centralized Error Handler
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: err.message || "Internal Server Error" });
+    console.error("Server Error:", err.message);
+    res.status(500).json({ 
+        error: err.message || "Internal Server Error",
+        details: process.env.VERCEL ? "Check Vercel logs or database connection" : err.stack
+    });
 });
 
 // Initialize and Start

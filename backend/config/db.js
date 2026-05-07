@@ -11,7 +11,16 @@ let pool;
 
 async function getPool() {
     if (!pool) {
-        pool = new Pool(dbConfig);
+        try {
+            pool = new Pool(dbConfig);
+            // Test the connection
+            await pool.query('SELECT 1');
+            console.log("Database connected successfully");
+        } catch (err) {
+            console.error("Database connection error details:", err.message);
+            pool = null; // Reset so we can try again
+            throw err;
+        }
     }
     return pool;
 }
