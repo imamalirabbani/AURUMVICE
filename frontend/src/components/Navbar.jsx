@@ -58,7 +58,9 @@ const Navbar = ({ cartCount, user }) => {
         <Link to="/about" onClick={() => setIsMenuOpen(false)} className={`nav-link-brioni ${location.pathname === '/about' ? 'active' : ''}`}>OUR STORY</Link>
         {isMenuOpen && (
           <>
-            <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">BAG ({cartCount})</Link>
+            {!location.pathname.startsWith('/admin') && (
+              <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">BAG ({cartCount})</Link>
+            )}
             {user && (
               <Link to="/my-orders" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PESANAN SAYA</Link>
             )}
@@ -110,9 +112,11 @@ const Navbar = ({ cartCount, user }) => {
           <Link to="/my-orders" className="nav-link-brioni desktop-only">PESANAN SAYA</Link>
         )}
 
-        <Link to="/cart" className="nav-link-brioni">
-          BAG {cartCount > 0 && <span>({cartCount})</span>}
-        </Link>
+        {!location.pathname.startsWith('/admin') && (
+          <Link to="/cart" className="nav-link-brioni">
+            BAG {cartCount > 0 && <span>({cartCount})</span>}
+          </Link>
+        )}
         {user ? (
           <Link to="/pengaturan" className="nav-link-brioni">PENGATURAN</Link>
         ) : (
