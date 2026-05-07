@@ -4,6 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const { getPool, initDatabase } = require('./config/db');
+const { supabase } = require('./config/supabase');
+
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -87,7 +89,36 @@ app.get('/api/products/:id', catchAsync(async (req, res) => {
 app.post('/api/products', upload.array('imageFiles', 5), catchAsync(async (req, res) => {
     const pool = await getPool();
     const { name, description, price, category } = req.body;
-    const mainImage = req.files?.length > 0 ? `/uploads/${req.files[0].filename}` : '';
+    let mainImage = '';
+    const imageUrls = [];
+
+    if (req.files && req.files.length > 0) {
+        for (const file of req.files) {
+            const fileExt = path.extname(file.originalname);
+            const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${fileExt}`;
+            const filePath = `products/${fileName}`;
+
+            const { data, error } = await supabase.storage
+                .from('product-images')
+                .upload(filePath, fs.readFileSync(file.path), {
+                    contentType: file.mimetype,
+                    upsert: true
+                });
+
+            if (error) throw error;
+
+            const { data: publicUrlData } = supabase.storage
+                .from('product-images')
+                .getPublicUrl(filePath);
+            
+            const publicUrl = publicUrlData.publicUrl;
+            imageUrls.push(publicUrl);
+            
+            // Clean up local temp file
+            if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+        }
+        mainImage = imageUrls[0];
+    }
 
     const { rows } = await pool.query(
         "INSERT INTO products (name, description, price, category, image) VALUES ($1, $2, $3, $4, $5) RETURNING id",
@@ -96,14 +127,13 @@ app.post('/api/products', upload.array('imageFiles', 5), catchAsync(async (req, 
     
     const productId = rows[0].id;
 
-    if (req.files?.length > 0) {
-        for (const file of req.files) {
-            await pool.query("INSERT INTO product_images (product_id, image_url) VALUES ($1, $2)", [productId, `/uploads/${file.filename}`]);
-        }
+    for (const url of imageUrls) {
+        await pool.query("INSERT INTO product_images (product_id, image_url) VALUES ($1, $2)", [productId, url]);
     }
     
     res.status(201).json({ id: productId, name, mainImage });
 }));
+
 
 // Delete product
 app.delete('/api/products/:id', catchAsync(async (req, res) => {
@@ -122,17 +152,40 @@ app.put('/api/products/:id', upload.array('imageFiles', 5), catchAsync(async (re
         [name, description, price, category, req.params.id]
     );
 
-    if (req.files?.length > 0) {
-        const mainImage = `/uploads/${req.files[0].filename}`;
+    if (req.files && req.files.length > 0) {
+        const imageUrls = [];
+        for (const file of req.files) {
+            const fileExt = path.extname(file.originalname);
+            const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${fileExt}`;
+            const filePath = `products/${fileName}`;
+
+            const { data, error } = await supabase.storage
+                .from('product-images')
+                .upload(filePath, fs.readFileSync(file.path), {
+                    contentType: file.mimetype,
+                    upsert: true
+                });
+
+            if (error) throw error;
+
+            const { data: publicUrlData } = supabase.storage
+                .from('product-images')
+                .getPublicUrl(filePath);
+            
+            imageUrls.push(publicUrlData.publicUrl);
+            if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+        }
+
+        const mainImage = imageUrls[0];
         await pool.query("UPDATE products SET image = $1 WHERE id = $2", [mainImage, req.params.id]);
         await pool.query("DELETE FROM product_images WHERE product_id = $1", [req.params.id]);
         
-        for (const file of req.files) {
-            await pool.query("INSERT INTO product_images (product_id, image_url) VALUES ($1, $2)", [req.params.id, `/uploads/${file.filename}`]);
+        for (const url of imageUrls) {
+            await pool.query("INSERT INTO product_images (product_id, image_url) VALUES ($1, $2)", [req.params.id, url]);
         }
     }
 
-    res.json({ message: "Product updated successfully" });
+    res.json({ message: "Product updated successfully with cloud storage" });
 }));
 
 // --- Cart Routes ---
