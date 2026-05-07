@@ -25,8 +25,8 @@ const Footer = () => {
               <h4>MAISON</h4>
               <Link to="/about">Our Story</Link>
               <Link to="/">Craftsmanship</Link>
-              <Link to="/">Sustainability</Link>
-              <a href="mailto:imamalirabbani@gmail.com">Contact</a>
+              <a href="mailto:imamalirabbani@gmail.com" style={{ textTransform: 'lowercase' }}>imamalirabbani@gmail.com</a>
+              <a href="tel:+6285182235662">+62 851-8223-5662</a>
             </div>
             
             <div className="footer-col-luxury">
@@ -35,9 +35,6 @@ const Footer = () => {
               <Link to="/">Returns</Link>
               <Link to="/">Bespoke Service</Link>
               <Link to="/">Care Guide</Link>
-
-
-              
             </div>
           </div>
         </div>
