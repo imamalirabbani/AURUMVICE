@@ -1,68 +1,58 @@
-import React from 'react';
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from 'react';
 
 const IntroAnimation = ({ onComplete }) => {
+  const [phase, setPhase] = useState('initial');
+
+  useEffect(() => {
+    const timers = [];
+    timers.push(setTimeout(() => setPhase('reveal'), 200));
+    timers.push(setTimeout(() => setPhase('text'), 1800));
+    timers.push(setTimeout(() => setPhase('exit'), 3500));
+    timers.push(setTimeout(() => onComplete(), 4500));
+    return () => timers.forEach(clearTimeout);
+  }, [onComplete]);
+
   return (
-    <div className="intro-animation-framer">
-      {/* Subtle background texture from our previous version */}
-      <div className="intro-bg-overlay" />
-      
-      <motion.div
-        initial={{
-          opacity: 0,
-          y: 80,
-          scale: 0.8,
-        }}
-        animate={{
-          opacity: 1,
-          y: 0,
-          scale: 1,
-        }}
-        transition={{
-          duration: 1.8,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-        onAnimationComplete={() => {
-          // Delay a bit after animation finishes before entering the site
-          setTimeout(onComplete, 1200);
-        }}
-        className="relative intro-logo-container"
-      >
-        {/* Using our high-fidelity SVG since /logo.png is missing */}
-        <div className="intro-av-logo-wrapper">
-          <svg viewBox="0 0 300 300" className="intro-av-svg-framer">
+    <div className={`intro-animation-white ${phase}`}>
+      <div className="intro-center">
+        <div className="intro-av-logo">
+          <svg viewBox="0 0 300 200" className="intro-av-svg">
             <defs>
-              <filter id="leatherTexture">
-                <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" result="noise" />
-                <feDiffuseLighting in="noise" lightingColor="#111111" surfaceScale="2">
-                  <feDistantLight azimuth="45" elevation="60" />
-                </feDiffuseLighting>
-                <feComposite operator="in" in2="SourceGraphic" />
+              <filter id="leatherNoise">
+                <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="4" stitchTiles="stitch"/>
+                <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+                <feComposite operator="in" in2="SourceGraphic" result="texture"/>
+                <feBlend mode="multiply" in="texture" in2="SourceGraphic" />
               </filter>
             </defs>
-
-            <g filter="url(#leatherTexture)">
-              <path d="M85,230 L135,80" stroke="#1a1a1a" strokeWidth="5" fill="none" />
-              <path d="M70,230 L100,230" stroke="#1a1a1a" strokeWidth="2.5" />
-              <path d="M135,80 L175,230" stroke="#1a1a1a" strokeWidth="20" fill="none" />
-              <path d="M175,230 L225,80" stroke="#1a1a1a" strokeWidth="5" fill="none" />
-              <path d="M210,80 L240,80" stroke="#1a1a1a" strokeWidth="2.5" />
-              <path d="M102,158 L195,158" stroke="#1a1a1a" strokeWidth="3.5" fill="none" />
+            <g filter="url(#leatherNoise)">
+              {/* A - left leg (thin) */}
+              <polygon points="67,160 73,160 123,40 117,40" fill="#1a1a1a" />
+              
+              {/* Middle leg (thick) */}
+              <polygon points="163,160 187,160 147,40 123,40" fill="#1a1a1a" />
+              
+              {/* V - right leg (thin) */}
+              <polygon points="182,160 188,160 238,40 232,40" fill="#1a1a1a" />
+              
+              {/* A - crossbar */}
+              <rect x="90" y="104" width="95" height="3" fill="#1a1a1a" />
+              
+              {/* A - left bottom serif */}
+              <rect x="55" y="158" width="30" height="2" fill="#1a1a1a" />
+              
+              {/* A - top left serif */}
+              <rect x="105" y="40" width="18" height="2" fill="#1a1a1a" />
+              
+              {/* V - right top serif */}
+              <rect x="220" y="40" width="30" height="2" fill="#1a1a1a" />
             </g>
           </svg>
         </div>
 
-        {/* Glow Effect from your snippet */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.15 }}
-          transition={{
-            duration: 2,
-            delay: 0.3,
-          }}
-          className="intro-glow"
-        />
-      </motion.div>
+        <div className="intro-white-brand">AURUMVICE</div>
+        <div className="intro-white-line" />
+      </div>
     </div>
   );
 };
