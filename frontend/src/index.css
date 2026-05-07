@@ -2040,17 +2040,25 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (max-width: 768px) {
   .about-manifesto {
-    margin: 4rem 0;
+    margin: 3rem 0;
   }
   
   .about-manifesto p.quote {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
+    line-height: 1.4;
   }
 
-  .about-craft-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+  .about-manifesto p:last-child {
+    font-size: 0.75rem !important;
   }
+
+
+  .about-craft-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 4rem;
+  }
+
 
   .about-craft-grid img:nth-child(2) {
     margin-top: 0 !important;
