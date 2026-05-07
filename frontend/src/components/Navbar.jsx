@@ -58,19 +58,31 @@ const Navbar = ({ cartCount, user }) => {
         <Link to="/" onClick={() => setIsMenuOpen(false)} className={`nav-link-brioni ${location.pathname === '/' ? 'active' : ''}`}>COLLECTION</Link>
         <Link to="/about" onClick={() => setIsMenuOpen(false)} className={`nav-link-brioni ${location.pathname === '/about' ? 'active' : ''}`}>OUR STORY</Link>
         {isMenuOpen && (
-          <>
-            {!isHideLinks && (
-              <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">BAG ({cartCount})</Link>
-            )}
-            {!isHideLinks && user && (
-              <Link to="/my-orders" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PESANAN SAYA</Link>
-            )}
-            {user ? (
-              <Link to="/pengaturan" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PENGATURAN</Link>
+          <div className="mobile-nav-links">
+            {isHideLinks ? (
+              /* ADMIN MOBILE VIEW */
+              <>
+                {user ? (
+                  <Link to="/pengaturan" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PENGATURAN</Link>
+                ) : (
+                  <Link to="/login" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">LOGIN</Link>
+                )}
+              </>
             ) : (
-              <Link to="/login" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">LOGIN</Link>
+              /* CLIENT MOBILE VIEW */
+              <>
+                <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">BAG ({cartCount})</Link>
+                {user && (
+                  <Link to="/my-orders" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PESANAN SAYA</Link>
+                )}
+                {user ? (
+                  <Link to="/pengaturan" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PENGATURAN</Link>
+                ) : (
+                  <Link to="/login" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">LOGIN</Link>
+                )}
+              </>
             )}
-          </>
+          </div>
         )}
       </div>
 
@@ -79,49 +91,62 @@ const Navbar = ({ cartCount, user }) => {
       </div>
 
       <div className="navbar-right desktop-only">
-        {user && (
-          <div className="nav-notification-wrapper">
-            <button className="nav-icon-btn" onClick={() => setShowNotifications(!showNotifications)}>
-              <Bell size={18} />
-              {unreadCount > 0 && <span className="notification-dot">{unreadCount}</span>}
-            </button>
-            
-            {showNotifications && (
-              <div className="notification-dropdown glass">
-                <div className="notif-header">
-                  <span>NOTIFIKASI</span>
-                  <button onClick={handleMarkAllRead}>Hapus Semua</button>
-                </div>
-                <div className="notif-list">
-                  {notifications.length > 0 ? (
-                    notifications.map(n => (
-                      <div key={n.id} className={`notif-item ${n.is_read ? '' : 'unread'}`} onClick={() => handleMarkAsRead(n.id)}>
-                        <p>{n.message}</p>
-                        <span>{new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="notif-empty">Tidak ada notifikasi</div>
-                  )}
-                </div>
+        {isHideLinks ? (
+          /* ADMIN VIEW: No Bag, No My Orders */
+          <>
+            {user ? (
+              <Link to="/pengaturan" className="nav-link-brioni">PENGATURAN</Link>
+            ) : (
+              <Link to="/login" className="nav-link-brioni">LOGIN</Link>
+            )}
+          </>
+        ) : (
+          /* CLIENT VIEW: Regular Bag & My Orders */
+          <>
+            {user && (
+              <div className="nav-notification-wrapper">
+                <button className="nav-icon-btn" onClick={() => setShowNotifications(!showNotifications)}>
+                  <Bell size={18} />
+                  {unreadCount > 0 && <span className="notification-dot">{unreadCount}</span>}
+                </button>
+                
+                {showNotifications && (
+                  <div className="notification-dropdown glass">
+                    <div className="notif-header">
+                      <span>NOTIFIKASI</span>
+                      <button onClick={handleMarkAllRead}>Hapus Semua</button>
+                    </div>
+                    <div className="notif-list">
+                      {notifications.length > 0 ? (
+                        notifications.map(n => (
+                          <div key={n.id} className={`notif-item ${n.is_read ? '' : 'unread'}`} onClick={() => handleMarkAsRead(n.id)}>
+                            <p>{n.message}</p>
+                            <span>{new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="notif-empty">Tidak ada notifikasi</div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
 
-        {!isHideLinks && user && (
-          <Link to="/my-orders" className="nav-link-brioni desktop-only">PESANAN SAYA</Link>
-        )}
+            {user && (
+              <Link to="/my-orders" className="nav-link-brioni desktop-only">PESANAN SAYA</Link>
+            )}
 
-        {!isHideLinks && (
-          <Link to="/cart" className="nav-link-brioni">
-            BAG {cartCount > 0 && <span>({cartCount})</span>}
-          </Link>
-        )}
-        {user ? (
-          <Link to="/pengaturan" className="nav-link-brioni">PENGATURAN</Link>
-        ) : (
-          <Link to="/login" className="nav-link-brioni">LOGIN</Link>
+            <Link to="/cart" className="nav-link-brioni">
+              BAG {cartCount > 0 && <span>({cartCount})</span>}
+            </Link>
+
+            {user ? (
+              <Link to="/pengaturan" className="nav-link-brioni">PENGATURAN</Link>
+            ) : (
+              <Link to="/login" className="nav-link-brioni">LOGIN</Link>
+            )}
+          </>
         )}
       </div>
 
