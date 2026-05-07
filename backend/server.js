@@ -14,7 +14,7 @@ app.use(express.json());
 
 // Setup uploads folder
 const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
+if (!process.env.VERCEL && !fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
@@ -231,6 +231,19 @@ app.use((err, req, res, next) => {
     });
 });
 
+let isDbInitialized = false;
+app.use(async (req, res, next) => {
+    if (process.env.VERCEL && !isDbInitialized) {
+        try {
+            await initDatabase();
+            isDbInitialized = true;
+        } catch (err) {
+            console.error("Lazy DB Init Error:", err);
+        }
+    }
+    next();
+});
+
 // Initialize and Start
 if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
     initDatabase().then(() => {
@@ -238,9 +251,6 @@ if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
     }).catch(err => {
         console.error("Database initialization failed:", err);
     });
-} else if (process.env.VERCEL) {
-    // On Vercel, just init the DB (it's async but Vercel will handle the app export)
-    initDatabase().catch(err => console.error("Vercel DB Init Error:", err));
 }
 
 module.exports = app;
