@@ -277,6 +277,12 @@ app.post('/api/login', catchAsync(async (req, res) => {
 }));
 
 // --- Profile Routes ---
+app.get('/api/users', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { rows } = await pool.query("SELECT id, username, email, address, created_at FROM users ORDER BY created_at DESC");
+    res.json(rows);
+}));
+
 app.get('/api/users/:id', catchAsync(async (req, res) => {
     const pool = await getPool();
     const { rows } = await pool.query("SELECT id, username, email, address FROM users WHERE id = $1", [req.params.id]);

@@ -88,6 +88,11 @@ export const api = {
     },
 
     // User
+    async getUsers() {
+        const res = await fetch(`${BASE_URL}/users`);
+        return handleResponse(res);
+    },
+
     async getUser(id) {
         const res = await fetch(`${BASE_URL}/users/${id}`);
         return handleResponse(res);
