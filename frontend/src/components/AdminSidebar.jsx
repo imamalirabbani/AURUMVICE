@@ -81,7 +81,7 @@ const AdminSidebar = ({ user }) => {
           }}
         >
           <LogOut size={20} />
-          <span>KELUAR ADMIN</span>
+          <span>KELUAR AKUN</span>
         </button>
       </div>
     </aside>
