@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
@@ -22,46 +22,18 @@ import MyOrders from './pages/MyOrders';
 import { api } from './services/api';
 import './index.css';
 
-function App() {
-  const [cartCount, setCartCount] = useState(0);
-  const [user, setUser] = useState(null);
+function AppContent({ cartCount, user, setUser, handleLogout, fetchCart }) {
+  const location = useLocation();
   const [showIntro, setShowIntro] = useState(true);
-
-  const fetchCart = useCallback(async () => {
-    try {
-      const data = await api.getCart();
-      const count = data.reduce((acc, item) => acc + item.quantity, 0);
-      setCartCount(count);
-    } catch (err) {
-      console.error("Failed to fetch cart", err);
-    }
-  }, []);
-
-  useEffect(() => {
-    const initializeApp = async () => {
-      await fetchCart();
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
-      }
-    };
-    initializeApp();
-  }, [fetchCart]);
-
 
   const handleIntroComplete = useCallback(() => {
     setShowIntro(false);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    setUser(null);
-  };
-
-  const isAdminPath = window.location.pathname.toLowerCase().includes('/admin');
+  const isAdminPath = location.pathname.toLowerCase().includes('/admin');
 
   return (
-    <Router>
+    <>
       <ScrollToTop />
       {showIntro && <IntroAnimation onComplete={handleIntroComplete} />}
       
@@ -88,6 +60,49 @@ function App() {
       </main>
 
       {!isAdminPath && <Footer />}
+    </>
+  );
+}
+
+function App() {
+  const [cartCount, setCartCount] = useState(0);
+  const [user, setUser] = useState(null);
+
+  const fetchCart = useCallback(async () => {
+    try {
+      const data = await api.getCart();
+      const count = data.reduce((acc, item) => acc + item.quantity, 0);
+      setCartCount(count);
+    } catch (err) {
+      console.error("Failed to fetch cart", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    const initializeApp = async () => {
+      await fetchCart();
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+      }
+    };
+    initializeApp();
+  }, [fetchCart]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
+  return (
+    <Router>
+      <AppContent 
+        cartCount={cartCount} 
+        user={user} 
+        setUser={setUser} 
+        handleLogout={handleLogout} 
+        fetchCart={fetchCart} 
+      />
     </Router>
   );
 }
