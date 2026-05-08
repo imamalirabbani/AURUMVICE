@@ -91,6 +91,23 @@ const MyOrders = ({ user }) => {
                   <Link to={`/order-success/${order.id}`} className="btn-link-brioni">
                     LIHAT DETAIL <ArrowRight size={16} />
                   </Link>
+                  {order.status === 'Pending' && (
+                    <button 
+                      className="btn-cancel-mini" 
+                      onClick={async () => {
+                        if (window.confirm("Apakah Anda yakin ingin membatalkan pesanan ini?")) {
+                          try {
+                            await api.cancelOrder(order.id);
+                            window.location.reload();
+                          } catch (err) {
+                            alert(err.message);
+                          }
+                        }
+                      }}
+                    >
+                      BATALKAN PESANAN
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

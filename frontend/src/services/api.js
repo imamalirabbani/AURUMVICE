@@ -156,6 +156,13 @@ export const api = {
         return handleResponse(res);
     },
 
+    async cancelOrder(id) {
+        const res = await fetch(`${BASE_URL}/orders/${id}/cancel`, {
+            method: 'PUT'
+        });
+        return handleResponse(res);
+    },
+
     async uploadPaymentProof(id, file) {
         const formData = new FormData();
         formData.append('paymentProof', file);

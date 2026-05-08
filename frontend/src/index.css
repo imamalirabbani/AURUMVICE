@@ -3511,6 +3511,24 @@ h1, h2, h3, h4, h5, h6 {
   100% { opacity: 1; transform: scale(1); }
 }
 
+.btn-cancel-mini {
+  background: transparent;
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  font-size: 0.65rem;
+  padding: 6px 12px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+  font-weight: 600;
+}
+
+.btn-cancel-mini:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+
 /* --- ADMIN SIDEBAR STYLES --- */
 .admin-layout {
   display: flex;

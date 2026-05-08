@@ -419,6 +419,27 @@ app.put('/api/orders/:id/status', catchAsync(async (req, res) => {
     res.json({ message: "Order status updated" });
 }));
 
+// Cancel Order (Client)
+app.put('/api/orders/:id/cancel', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const orderId = req.params.id;
+    
+    // Check if order exists and is still pending
+    const { rows } = await pool.query("SELECT status, user_id FROM orders WHERE id = $1", [orderId]);
+    if (rows.length === 0) return res.status(404).json({ error: "Order not found" });
+    
+    if (rows[0].status !== 'Pending') {
+        return res.status(400).json({ error: "Hanya pesanan berstatus 'Pending' yang bisa dibatalkan." });
+    }
+
+    await pool.query("UPDATE orders SET status = 'Cancel' WHERE id = $1", [orderId]);
+    
+    // Notify admin about cancellation
+    await createNotification(1, `Pesanan #${orderId} telah dibatalkan oleh pelanggan.`, 'alert');
+
+    res.json({ message: "Pesanan berhasil dibatalkan" });
+}));
+
 // Upload Payment Proof
 app.post('/api/orders/:id/payment', upload.single('paymentProof'), catchAsync(async (req, res) => {
     const pool = await getPool();
