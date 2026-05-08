@@ -113,6 +113,15 @@ export const api = {
         return handleResponse(res);
     },
 
+    async updateAbout(data) {
+        const res = await fetch(`${BASE_URL}/about`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        return handleResponse(res);
+    },
+
     // Orders
     async createOrder(orderData) {
         const res = await fetch(`${BASE_URL}/orders`, {
