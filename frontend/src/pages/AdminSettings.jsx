@@ -100,64 +100,83 @@ const AdminSettings = ({ user }) => {
       </div>
 
       <style>{`
+        .admin-settings-page {
+          max-width: 900px;
+          margin: 0 auto;
+        }
+        .admin-header {
+          text-align: center;
+          padding: 3rem 2rem;
+        }
         .settings-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+          display: flex;
+          flex-direction: column;
           gap: 2rem;
         }
         .settings-section {
-          padding: 2rem;
+          padding: 2.5rem;
         }
         .section-header {
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 1rem;
           margin-bottom: 0.5rem;
         }
         .section-header h3 {
           margin: 0;
           font-size: 1rem;
-          letter-spacing: 1px;
+          letter-spacing: 2px;
+          color: var(--primary-color);
         }
         .section-desc {
           font-size: 0.8rem;
           color: var(--text-secondary);
-          margin-bottom: 2rem;
+          margin-bottom: 2.5rem;
+          text-align: center;
         }
         .settings-form {
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
+          gap: 2rem;
         }
         .settings-group {
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
+          gap: 0.75rem;
         }
         .settings-group label {
           font-size: 0.7rem;
-          font-weight: 700;
+          font-weight: 800;
           color: var(--accent-gold);
+          letter-spacing: 1px;
         }
         .settings-group input, .settings-group textarea {
-          padding: 10px;
-          border: 1px solid #eee;
+          padding: 12px 15px;
+          border: 1px solid #f0f0f0;
           font-family: inherit;
           font-size: 0.9rem;
+          background: #fafafa;
+          border-radius: 4px;
+        }
+        .settings-group input:focus, .settings-group textarea:focus {
+          border-color: var(--accent-gold);
+          background: white;
+          outline: none;
         }
         .disabled {
           opacity: 0.6;
-          background: #f9f9f9;
+          background: #fdfdfd;
         }
         .placeholder-content {
-          height: 200px;
+          height: 150px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           gap: 1rem;
           text-align: center;
-          color: #999;
+          color: #bbb;
           font-size: 0.8rem;
         }
       `}</style>
