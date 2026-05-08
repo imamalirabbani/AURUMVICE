@@ -59,7 +59,8 @@ async function initDatabase() {
         username VARCHAR(255) UNIQUE NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        address TEXT
+        address TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
 
     await runQuery("Cart Table", `CREATE TABLE IF NOT EXISTS cart (
@@ -136,8 +137,16 @@ async function initDatabase() {
             await p.query(`ALTER TABLE orders ADD COLUMN ${col.name} ${col.def}`);
             console.log(`Column ${col.name} added to orders.`);
         } catch (err) {
-            // Ignore if column already exists (error code 42701)
+            // Ignore if column already exists
         }
+    }
+
+    // Add created_at to users if missing
+    try {
+        await p.query("ALTER TABLE users ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+        console.log("Column created_at added to users.");
+    } catch (err) {
+        // Ignore if exists
     }
 
     // Default Data
