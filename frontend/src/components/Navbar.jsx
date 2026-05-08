@@ -70,7 +70,7 @@ const Navbar = ({ cartCount, user }) => {
                   <Link to="/admin/dashboard" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni" style={{ color: 'var(--accent-gold)' }}>ADMIN DASHBOARD</Link>
                 )}
                 {user ? (
-                  <Link to="/pengaturan" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PENGATURAN</Link>
+                  !isAdminUser && <Link to="/pengaturan" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PENGATURAN</Link>
                 ) : (
                   <Link to="/login" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">LOGIN</Link>
                 )}
@@ -105,7 +105,7 @@ const Navbar = ({ cartCount, user }) => {
               <Link to="/admin/dashboard" className="nav-link-brioni" style={{ color: 'var(--accent-gold)', fontWeight: 'bold' }}>ADMIN DASHBOARD</Link>
             )}
             {user ? (
-              <Link to="/pengaturan" className="nav-link-brioni">PENGATURAN</Link>
+              !isAdminUser && <Link to="/pengaturan" className="nav-link-brioni">PENGATURAN</Link>
             ) : (
               <Link to="/login" className="nav-link-brioni">LOGIN</Link>
             )}
