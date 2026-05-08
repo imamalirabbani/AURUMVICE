@@ -101,12 +101,16 @@ const AdminSettings = ({ user }) => {
 
       <style>{`
         .admin-settings-page {
-          max-width: 900px;
+          max-width: 800px;
           margin: 0 auto;
+          min-height: calc(100vh - 150px);
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
         }
         .admin-header {
           text-align: center;
-          padding: 3rem 2rem;
+          padding-bottom: 2rem;
         }
         .settings-grid {
           display: flex;
@@ -114,7 +118,8 @@ const AdminSettings = ({ user }) => {
           gap: 2rem;
         }
         .settings-section {
-          padding: 2.5rem;
+          padding: 3rem;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
         .section-header {
           display: flex;
