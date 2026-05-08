@@ -402,8 +402,20 @@ app.get('/api/orders/:id', catchAsync(async (req, res) => {
 // Get all orders for a specific user
 app.get('/api/orders/user/:userId', catchAsync(async (req, res) => {
     const pool = await getPool();
-    const { rows } = await pool.query("SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC", [req.params.userId]);
-    res.json(rows);
+    const { rows: orders } = await pool.query("SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC", [req.params.userId]);
+    
+    // Enrich with items
+    const ordersWithItems = await Promise.all(orders.map(async (order) => {
+        const { rows: items } = await pool.query(`
+            SELECT oi.*, p.name, p.image 
+            FROM order_items oi 
+            JOIN products p ON oi.product_id = p.id 
+            WHERE oi.order_id = $1
+        `, [order.id]);
+        return { ...order, items };
+    }));
+
+    res.json(ordersWithItems);
 }));
 
 // Update order status (Admin)
