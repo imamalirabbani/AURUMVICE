@@ -15,6 +15,9 @@ import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminOrders from './pages/AdminOrders';
+import AdminProducts from './pages/AdminProducts';
+import AdminUsers from './pages/AdminUsers';
+import AdminSettings from './pages/AdminSettings';
 import MyOrders from './pages/MyOrders';
 import { api } from './services/api';
 import './index.css';
@@ -78,6 +81,9 @@ function App() {
           <Route path="/my-orders" element={<MyOrders user={user} />} />
           <Route path="/admin/dashboard" element={<AdminDashboard user={user} />} />
           <Route path="/admin/orders" element={<AdminOrders user={user} />} />
+          <Route path="/admin/products" element={<AdminProducts user={user} />} />
+          <Route path="/admin/users" element={<AdminUsers user={user} />} />
+          <Route path="/admin/settings" element={<AdminSettings user={user} />} />
         </Routes>
       </main>
 
