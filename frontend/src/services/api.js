@@ -4,12 +4,13 @@ export const IMAGE_BASE_URL = BASE_URL.replace('/api', '');
 export const getImgUrl = (url, placeholder = '800x1000?text=AURUMVICE') => {
     if (!url) return `https://via.placeholder.com/${placeholder}`;
     
-    // Fix malformed URLs like "https//..." (missing colon)
-    let cleanUrl = url;
-    if (url.startsWith('https//')) {
-      cleanUrl = url.replace('https//', 'https://');
-    } else if (url.startsWith('http//')) {
-      cleanUrl = url.replace('http//', 'http://');
+    // Trim and fix common protocol issues (like missing colon or multiple slashes)
+    let cleanUrl = url.trim();
+    
+    // If it looks like an absolute URL but is missing the colon or has extra slashes
+    // Example: "https//..." or "https:///..."
+    if (/^https?[\/]+/.test(cleanUrl)) {
+        cleanUrl = cleanUrl.replace(/^(https?)[\/]+/, '$1://');
     }
 
     if (cleanUrl.startsWith('http')) return cleanUrl;
