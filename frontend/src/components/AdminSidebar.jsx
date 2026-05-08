@@ -71,10 +71,18 @@ const AdminSidebar = ({ user }) => {
       `}</style>
 
       <div className="sidebar-footer">
-        <Link to="/" className="sidebar-link logout">
+        <button 
+          className="sidebar-link logout-btn-sidebar" 
+          onClick={() => {
+            if (window.confirm("Keluar dari dashboard admin?")) {
+              if (onLogout) onLogout();
+              window.location.href = '/';
+            }
+          }}
+        >
           <LogOut size={20} />
           <span>KELUAR ADMIN</span>
-        </Link>
+        </button>
       </div>
     </aside>
   );

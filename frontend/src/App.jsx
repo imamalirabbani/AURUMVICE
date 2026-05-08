@@ -79,11 +79,11 @@ function App() {
           <Route path="/checkout" element={<Checkout user={user} onOrderComplete={fetchCart} />} />
           <Route path="/order-success/:id" element={<OrderSuccess />} />
           <Route path="/my-orders" element={<MyOrders user={user} />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard user={user} />} />
-          <Route path="/admin/orders" element={<AdminOrders user={user} />} />
-          <Route path="/admin/products" element={<AdminProducts user={user} />} />
-          <Route path="/admin/users" element={<AdminUsers user={user} />} />
-          <Route path="/admin/settings" element={<AdminSettings user={user} />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard user={user} onLogout={handleLogout} />} />
+          <Route path="/admin/orders" element={<AdminOrders user={user} onLogout={handleLogout} />} />
+          <Route path="/admin/products" element={<AdminProducts user={user} onLogout={handleLogout} />} />
+          <Route path="/admin/users" element={<AdminUsers user={user} onLogout={handleLogout} />} />
+          <Route path="/admin/settings" element={<AdminSettings user={user} onLogout={handleLogout} />} />
         </Routes>
       </main>
 
