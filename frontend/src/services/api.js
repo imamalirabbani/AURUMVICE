@@ -7,10 +7,10 @@ export const getImgUrl = (url, placeholder = '800x1000?text=AURUMVICE') => {
     // Trim and fix common protocol issues (like missing colon or multiple slashes)
     let cleanUrl = url.trim();
     
-    // If it looks like an absolute URL but is missing the colon or has extra slashes
-    // Example: "https//..." or "https:///..."
-    if (/^https?[\/]+/.test(cleanUrl)) {
-        cleanUrl = cleanUrl.replace(/^(https?)[\/]+/, '$1://');
+    // Nuclear fix for protocol issues (missing colon, extra slashes)
+    // This turns "https//something" or "https:///something" into "https://something"
+    if (cleanUrl.toLowerCase().startsWith('http')) {
+        cleanUrl = cleanUrl.replace(/^(https?):?\/*\/*/i, '$1://');
     }
 
     if (cleanUrl.startsWith('http')) return cleanUrl;

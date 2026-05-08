@@ -66,6 +66,9 @@ const Navbar = ({ cartCount, user }) => {
             {isHideLinks ? (
               /* ADMIN MOBILE */
               <>
+                {isAdminUser && (
+                  <Link to="/admin/dashboard" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni" style={{ color: 'var(--accent-gold)' }}>ADMIN DASHBOARD</Link>
+                )}
                 {user ? (
                   <Link to="/pengaturan" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PENGATURAN</Link>
                 ) : (
@@ -98,6 +101,9 @@ const Navbar = ({ cartCount, user }) => {
         {isHideLinks ? (
           /* ADMIN DESKTOP */
           <>
+            {isAdminUser && (
+              <Link to="/admin/dashboard" className="nav-link-brioni" style={{ color: 'var(--accent-gold)', fontWeight: 'bold' }}>ADMIN DASHBOARD</Link>
+            )}
             {user ? (
               <Link to="/pengaturan" className="nav-link-brioni">PENGATURAN</Link>
             ) : (
