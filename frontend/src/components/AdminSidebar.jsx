@@ -1,13 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, ShoppingCart, Package, Users, Settings, LogOut, ChevronRight } from 'lucide-react';
+import { api } from '../services/api';
 
 const AdminSidebar = ({ user }) => {
   const location = useLocation();
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    const fetchPending = async () => {
+      try {
+        const orders = await api.getOrders();
+        const pending = orders.filter(o => o.status === 'Pending' || o.payment_status === 'Pending Verification').length;
+        setPendingCount(pending);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchPending();
+    const interval = setInterval(fetchPending, 30000); // Check every 30s
+    return () => clearInterval(interval);
+  }, []);
 
   const menuItems = [
     { name: 'DASHBOARD', path: '/admin/dashboard', icon: <LayoutDashboard size={20} /> },
-    { name: 'PESANAN', path: '/admin/orders', icon: <ShoppingCart size={20} /> },
+    { name: 'PESANAN', path: '/admin/orders', icon: <ShoppingCart size={20} />, badge: pendingCount },
     { name: 'PRODUK', path: '/admin/products', icon: <Package size={20} /> },
     { name: 'PELANGGAN', path: '/admin/users', icon: <Users size={20} /> },
     { name: 'PENGATURAN', path: '/admin/settings', icon: <Settings size={20} /> },
@@ -34,10 +51,24 @@ const AdminSidebar = ({ user }) => {
           >
             <span className="icon-box">{item.icon}</span>
             <span className="link-text">{item.name}</span>
+            {item.badge > 0 && <span className="sidebar-badge">{item.badge}</span>}
             <ChevronRight size={16} className="arrow" />
           </Link>
         ))}
       </nav>
+
+      <style>{`
+        .sidebar-badge {
+          background: #e74c3c;
+          color: white;
+          font-size: 0.65rem;
+          padding: 2px 8px;
+          border-radius: 10px;
+          margin-left: auto;
+          margin-right: 10px;
+          font-weight: 700;
+        }
+      `}</style>
 
       <div className="sidebar-footer">
         <Link to="/" className="sidebar-link logout">
