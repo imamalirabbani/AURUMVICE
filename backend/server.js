@@ -139,6 +139,32 @@ const createNotification = async (userId, message, type = 'info') => {
     }
 };
 
+// Test DB Connection
+app.get('/api/health', async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.query('SELECT NOW()');
+        res.json({
+            status: 'success',
+            message: 'Database connected successfully',
+            time: result.rows[0].now,
+            config: {
+                host: process.env.DB_HOST,
+                port: process.env.DB_HOST?.includes('pooler') ? 6543 : 5432,
+                database: process.env.DB_NAME,
+                user: process.env.DB_USER
+            }
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: 'error',
+            message: err.message,
+            code: err.code,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        });
+    }
+});
+
 // --- Routes ---
 
 // Get all products (Optimized)
