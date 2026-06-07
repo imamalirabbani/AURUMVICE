@@ -79,6 +79,14 @@ const AdminDashboard = ({ user, onLogout }) => {
               <button className="btn-lux-action secondary" onClick={() => window.location.href='/admin/products'}>
                 Manajemen Produk
               </button>
+              <button className="btn-lux-action logout" onClick={() => {
+                if(window.confirm("Keluar dari dashboard admin?")) {
+                  if(onLogout) onLogout();
+                  window.location.href='/';
+                }
+              }}>
+                Keluar Dashboard
+              </button>
             </div>
           </div>
         </div>
@@ -178,6 +186,17 @@ const AdminDashboard = ({ user, onLogout }) => {
         }
         .btn-lux-action.secondary:hover {
           background: #f8f9fa;
+          transform: translateY(-2px);
+        }
+        .btn-lux-action.logout {
+          background: #333;
+          color: white;
+          border: 1px solid #444;
+        }
+        .btn-lux-action.logout:hover {
+          background: #e74c3c;
+          border-color: #e74c3c;
+          color: white;
           transform: translateY(-2px);
         }
         @media (max-width: 768px) {
