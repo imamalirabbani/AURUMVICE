@@ -3534,6 +3534,15 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   min-height: 100vh;
   background: #f8f9fa;
+  width: 100%;
+}
+
+.admin-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #f8f9fa;
 }
 
 .orders-stack-minimal {
@@ -3798,8 +3807,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .admin-main-view {
   flex: 1;
-  padding: 2rem 3rem;
+  padding: 2rem;
   overflow-y: auto;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .admin-main-view {
+    padding: 1.5rem;
+  }
 }
 
 /* Mobile Sidebar Overrides */

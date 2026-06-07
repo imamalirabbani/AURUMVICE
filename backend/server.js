@@ -108,11 +108,10 @@ const createNotification = async (userId, message, type = 'info') => {
 
 // --- Routes ---
 
-// Get all products
+// Get all products (Optimized)
 app.get('/api/products', catchAsync(async (req, res) => {
     const pool = await getPool();
     const { search, category } = req.query;
-    let query = "SELECT * FROM products";
     const params = [];
     const conditions = [];
 
@@ -125,18 +124,25 @@ app.get('/api/products', catchAsync(async (req, res) => {
         conditions.push(`category = $${params.length}`);
     }
 
+    let query = `
+        SELECT p.*, 
+        COALESCE(
+            (SELECT json_agg(image_url) 
+             FROM product_images 
+             WHERE product_id = p.id), 
+            '[]'
+        ) as images
+        FROM products p
+    `;
+
     if (conditions.length > 0) {
         query += ` WHERE ${conditions.join(" AND ")}`;
     }
 
+    query += " ORDER BY p.id DESC";
+
     const { rows } = await pool.query(query, params);
-    
-    const productsWithImages = await Promise.all(rows.map(async (product) => {
-        const { rows: images } = await pool.query("SELECT image_url FROM product_images WHERE product_id = $1", [product.id]);
-        return { ...product, images: images.map(img => img.image_url) };
-    }));
-    
-    res.json(productsWithImages);
+    res.json(rows);
 }));
 
 // Get single product
@@ -437,23 +443,27 @@ app.post('/api/orders', authenticateToken, catchAsync(async (req, res) => {
     res.status(201).json({ id: orderId, message: "Order placed successfully" });
 }));
 
-// Get all orders (Admin)
+// Get all orders (Admin Optimized)
 app.get('/api/orders', authenticateToken, requireAdmin, catchAsync(async (req, res) => {
     const pool = await getPool();
-    const { rows: orders } = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
+    const query = `
+        SELECT o.*, 
+        COALESCE(
+            (SELECT json_agg(item_data)
+             FROM (
+                 SELECT oi.*, p.name, p.image 
+                 FROM order_items oi 
+                 JOIN products p ON oi.product_id = p.id 
+                 WHERE oi.order_id = o.id
+             ) item_data), 
+            '[]'
+        ) as items
+        FROM orders o 
+        ORDER BY o.created_at DESC
+    `;
     
-    // Enrich with items
-    const ordersWithItems = await Promise.all(orders.map(async (order) => {
-        const { rows: items } = await pool.query(`
-            SELECT oi.*, p.name, p.image 
-            FROM order_items oi 
-            JOIN products p ON oi.product_id = p.id 
-            WHERE oi.order_id = $1
-        `, [order.id]);
-        return { ...order, items };
-    }));
-
-    res.json(ordersWithItems);
+    const { rows: orders } = await pool.query(query);
+    res.json(orders);
 }));
 
 // Get single order details
@@ -475,23 +485,28 @@ app.get('/api/orders/:id', authenticateToken, catchAsync(async (req, res) => {
     res.json({ ...orders[0], items, tracking_logs: trackingLogs });
 }));
 
-// Get all orders for a specific user
+// Get all orders for a specific user (Optimized)
 app.get('/api/orders/user/:userId', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
-    const { rows: orders } = await pool.query("SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC", [req.params.userId]);
+    const query = `
+        SELECT o.*, 
+        COALESCE(
+            (SELECT json_agg(item_data)
+             FROM (
+                 SELECT oi.*, p.name, p.image 
+                 FROM order_items oi 
+                 JOIN products p ON oi.product_id = p.id 
+                 WHERE oi.order_id = o.id
+             ) item_data), 
+            '[]'
+        ) as items
+        FROM orders o 
+        WHERE o.user_id = $1
+        ORDER BY o.created_at DESC
+    `;
     
-    // Enrich with items
-    const ordersWithItems = await Promise.all(orders.map(async (order) => {
-        const { rows: items } = await pool.query(`
-            SELECT oi.*, p.name, p.image 
-            FROM order_items oi 
-            JOIN products p ON oi.product_id = p.id 
-            WHERE oi.order_id = $1
-        `, [order.id]);
-        return { ...order, items };
-    }));
-
-    res.json(ordersWithItems);
+    const { rows: orders } = await pool.query(query, [req.params.userId]);
+    res.json(orders);
 }));
 
 // Update order status (Admin)
