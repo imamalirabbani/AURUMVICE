@@ -35,8 +35,11 @@ const Home = () => {
       <section className="brioni-hero">
         <img 
           src="/hero-brioni-new.png" 
-          alt="AURUMVICE Collection" 
+          alt="AURUMVICE Luxury Collection Spring Summer 2026" 
           className="brioni-hero-bg" 
+          width="1920"
+          height="1080"
+          fetchpriority="high"
         />
         <div className="brioni-hero-overlay">
           <h1 className="brioni-hero-title">SPRING / SUMMER 2026</h1>
@@ -49,6 +52,7 @@ const Home = () => {
                 placeholder="FIND YOUR PIECE..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                aria-label="Cari produk gaya hidup mewah"
               />
               <Search size={18} className="search-icon-luxury" />
             </div>
@@ -57,6 +61,7 @@ const Home = () => {
           <button 
             className="btn btn-primary brioni-hero-btn" 
             onClick={() => navigate('/about')}
+            aria-label="Temukan lebih banyak tentang koleksi kami"
           >
             DISCOVER MORE
           </button>

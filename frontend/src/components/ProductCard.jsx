@@ -8,9 +8,16 @@ const ProductCard = ({ product }) => {
 
   return (
     <div className="product-card-luxury">
-      <Link to={`/product/${product.id}`} className="product-image-link">
+      <Link to={`/product/${product.id}`} className="product-image-link" aria-label={`Detail produk ${product.name}`}>
         <div className="product-image-wrapper">
-          <img src={getImgUrl(product.image)} alt={product.name} className="product-image" />
+          <img 
+            src={getImgUrl(product.image)} 
+            alt={product.name} 
+            className="product-image" 
+            loading="lazy"
+            width="400"
+            height="500"
+          />
           <div className="product-overlay">
             <span>EXPLORE PIECE</span>
           </div>

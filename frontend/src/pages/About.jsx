@@ -28,7 +28,15 @@ const About = () => {
   return (
     <div className="about-page">
       <section className="brioni-hero">
-        <img src="/hero-about.png" alt="About Aurumvice" className="brioni-hero-bg" style={{ filter: 'brightness(0.7)' }} />
+        <img 
+          src="/hero-about.png" 
+          alt="Tentang AURUMVICE - Warisan dan Filosofi Kami" 
+          className="brioni-hero-bg" 
+          style={{ filter: 'brightness(0.7)' }} 
+          width="1920"
+          height="800"
+          fetchpriority="high"
+        />
         <div className="brioni-hero-overlay" style={{ justifyContent: 'center', padding: 0 }}>
           <div className="hero-tagline" style={{ color: 'white', letterSpacing: '0.4rem', marginBottom: '1rem', fontSize: '0.8rem' }}>OUR HERITAGE</div>
           <h1 className="brioni-hero-title" style={{ fontSize: '3rem', letterSpacing: '1rem' }}>BEYOND ORDINARY</h1>
@@ -47,8 +55,8 @@ const About = () => {
         </div>
 
         <div className="about-craft-grid">
-          <img src="/about-female.png" alt="Our Craft 1" style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover' }} />
-          <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=1200" alt="Our Craft 2" style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover', marginTop: '4rem' }} />
+          <img src="/about-female.png" alt="Kerajinan Tangan AURUMVICE 1" style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover' }} loading="lazy" width="400" height="533" />
+          <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=1200" alt="Kerajinan Tangan AURUMVICE 2" style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover', marginTop: '4rem' }} loading="lazy" width="400" height="533" />
         </div>
 
         <section style={{ marginBottom: '8rem' }}>
@@ -79,7 +87,7 @@ const About = () => {
           </p>
           <div style={{ marginBottom: '3rem' }}>
             <p style={{ fontSize: '0.8rem', letterSpacing: '0.1rem', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>Customer Inquiries</p>
-            <a href="mailto:imamalirabbani@gmail.com" style={{ color: '#000', fontSize: '1.1rem', textDecoration: 'none', borderBottom: '1px solid #000', paddingBottom: '2px' }}>imamalirabbani@gmail.com</a>
+            <a href="mailto:imamalirabbani@gmail.com" aria-label="Kirim email ke layanan pelanggan AURUMVICE" style={{ color: '#000', fontSize: '1.1rem', textDecoration: 'none', borderBottom: '1px solid #000', paddingBottom: '2px' }}>imamalirabbani@gmail.com</a>
           </div>
           <button className="btn btn-primary" style={{ padding: '15px 40px' }} onClick={() => navigate('/')}>EXPLORE COLLECTION</button>
         </section>

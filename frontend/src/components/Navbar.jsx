@@ -53,7 +53,7 @@ const Navbar = ({ cartCount, user }) => {
 
   return (
     <header className="navbar-brioni" data-admin={isAdminPath}>
-      <button className="mobile-menu-btn" onClick={toggleMenu}>
+      <button className="mobile-menu-btn" onClick={toggleMenu} aria-label={isMenuOpen ? "Tutup menu" : "Buka menu"}>
         {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
@@ -115,7 +115,7 @@ const Navbar = ({ cartCount, user }) => {
           <>
             {user && (
               <div className="nav-notification-wrapper">
-                <button className="nav-icon-btn" onClick={() => setShowNotifications(!showNotifications)}>
+                <button className="nav-icon-btn" onClick={() => setShowNotifications(!showNotifications)} aria-label="Lihat notifikasi">
                   <Bell size={18} />
                   {unreadCount > 0 && <span className="notification-dot">{unreadCount}</span>}
                 </button>
