@@ -60,29 +60,52 @@ const requireAdmin = (req, res, next) => {
 let isDbInitialized = false;
 let isDbInitializing = false;
 
+// Quick check function to see if DB is already set up
+async function checkIsSetup() {
+    try {
+        const pool = await getPool();
+        // Just check if users table exists
+        await pool.query("SELECT 1 FROM users LIMIT 1");
+        return true;
+    } catch (err) {
+        // If table doesn't exist, PG returns code 42P01
+        return false;
+    }
+}
+
 app.use(async (req, res, next) => {
+    // If we already know it's initialized in this instance, proceed
     if (isDbInitialized) return next();
     
+    // Prevent multiple concurrent init attempts
     if (isDbInitializing) {
-        // Wait for a bit and then give up or just retry
-        return res.status(503).json({ error: "Database is currently initializing. Please refresh in a moment." });
+        return res.status(503).json({ error: "Database is initializing. Please refresh in a few seconds." });
     }
 
     isDbInitializing = true;
     try {
-        console.log("Initializing database schema...");
-        await initDatabase();
+        // Step 1: Quick check if already setup
+        const alreadySetup = await checkIsSetup();
+        
+        if (!alreadySetup) {
+            console.log("Database tables missing. Starting full initialization...");
+            await initDatabase();
+            console.log("Database initialized successfully");
+        } else {
+            console.log("Database already setup. Skipping initialization.");
+        }
+        
         isDbInitialized = true;
-        console.log("Database schema initialized successfully");
         isDbInitializing = false;
         next();
     } catch (err) {
         isDbInitializing = false;
-        console.error("Database Init Error:", err);
+        console.error("Critical DB Error:", err);
         res.status(500).json({ 
-            error: "Database Initialization Failed",
-            details: err.message,
-            code: err.code
+            error: "Database Connection or Initialization Failed",
+            message: err.message,
+            code: err.code,
+            hint: "Check if Supabase credentials are correct and database is not paused."
         });
     }
 });
