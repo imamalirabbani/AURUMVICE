@@ -69,7 +69,8 @@ app.use(async (req, res, next) => {
         } catch (err) {
             console.error("Database Init Error:", err);
             res.status(500).json({ 
-                error: "Database Initialization Failed"
+                error: "Database Initialization Failed",
+                details: err.message
             });
         }
     } else {
@@ -130,7 +131,7 @@ app.get('/api/products', catchAsync(async (req, res) => {
             (SELECT json_agg(image_url) 
              FROM product_images 
              WHERE product_id = p.id), 
-            '[]'
+            '[]'::json
         ) as images
         FROM products p
     `;
@@ -456,7 +457,7 @@ app.get('/api/orders', authenticateToken, requireAdmin, catchAsync(async (req, r
                  JOIN products p ON oi.product_id = p.id 
                  WHERE oi.order_id = o.id
              ) item_data), 
-            '[]'
+            '[]'::json
         ) as items
         FROM orders o 
         ORDER BY o.created_at DESC
@@ -498,7 +499,7 @@ app.get('/api/orders/user/:userId', authenticateToken, catchAsync(async (req, re
                  JOIN products p ON oi.product_id = p.id 
                  WHERE oi.order_id = o.id
              ) item_data), 
-            '[]'
+            '[]'::json
         ) as items
         FROM orders o 
         WHERE o.user_id = $1

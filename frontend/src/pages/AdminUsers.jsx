@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import { Users, Mail, MapPin, Calendar, Search, Trash2, ShieldCheck } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
-const AdminUsers = ({ user }) => {
+const AdminUsers = ({ user, onLogout }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,7 +29,7 @@ const AdminUsers = ({ user }) => {
   );
 
   return (
-    <AdminLayout user={user}>
+    <AdminLayout user={user} onLogout={onLogout}>
       <div className="admin-users-page">
         <div className="admin-header glass" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <div>

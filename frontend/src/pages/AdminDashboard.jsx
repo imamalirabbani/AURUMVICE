@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import { ShoppingBag, Users, DollarSign, TrendingUp, Package } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
-const AdminDashboard = ({ user }) => {
+const AdminDashboard = ({ user, onLogout }) => {
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -48,7 +48,7 @@ const AdminDashboard = ({ user }) => {
   ];
 
   return (
-    <AdminLayout user={user}>
+    <AdminLayout user={user} onLogout={onLogout}>
       <div className="admin-dashboard">
         <div className="admin-welcome-card glass" style={{ marginBottom: '2rem', padding: '2.5rem', background: 'linear-gradient(135deg, #000 0%, #222 100%)', color: 'white' }}>
           <h1 style={{ color: '#C5A059', letterSpacing: '4px', marginBottom: '0.5rem' }}>DASHBOARD ADMIN</h1>

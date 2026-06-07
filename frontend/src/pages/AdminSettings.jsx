@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import { Save, Info, Shield, Bell, Globe, Layout } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
-const AdminSettings = ({ user }) => {
+const AdminSettings = ({ user, onLogout }) => {
   const [aboutContent, setAboutContent] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -43,7 +43,7 @@ const AdminSettings = ({ user }) => {
   };
 
   return (
-    <AdminLayout user={user}>
+    <AdminLayout user={user} onLogout={onLogout}>
       <div className="admin-settings-page">
         <div className="admin-header glass" style={{ marginBottom: '2rem' }}>
           <h1>PENGATURAN TOKO</h1>

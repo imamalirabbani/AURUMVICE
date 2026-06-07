@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, ShoppingCart, Package, Users, Settings, LogOut, ChevronRight } from 'lucide-react';
 import { api } from '../services/api';
 
-const AdminSidebar = ({ user }) => {
+const AdminSidebar = ({ user, onLogout }) => {
   const location = useLocation();
   const [pendingCount, setPendingCount] = useState(0);
 

@@ -3,7 +3,7 @@ import { api, getImgUrl } from '../services/api';
 import { Plus, Edit, Trash2, Search, Package, Image as ImageIcon, X } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
-const AdminProducts = ({ user }) => {
+const AdminProducts = ({ user, onLogout }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -99,7 +99,7 @@ const AdminProducts = ({ user }) => {
   };
 
   return (
-    <AdminLayout user={user}>
+    <AdminLayout user={user} onLogout={onLogout}>
       <div className="admin-products-page">
         <div className="admin-header glass" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <div>

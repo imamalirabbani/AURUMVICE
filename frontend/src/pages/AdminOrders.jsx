@@ -4,7 +4,7 @@ import { Package, Truck, CheckCircle, XCircle, Clock, Eye, Printer, MapPin, Send
 
 import AdminLayout from '../components/AdminLayout';
 
-const AdminOrders = ({ user }) => {
+const AdminOrders = ({ user, onLogout }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -142,7 +142,7 @@ const AdminOrders = ({ user }) => {
   if (loading) return <div className="empty-state">Loading orders...</div>;
 
   return (
-    <AdminLayout user={user}>
+    <AdminLayout user={user} onLogout={onLogout}>
       <div className="admin-orders-page">
       <div className="admin-header glass">
         <h1>MANAJEMEN PESANAN</h1>
