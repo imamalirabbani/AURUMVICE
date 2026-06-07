@@ -3,16 +3,58 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { getPool, initDatabase } = require('./config/db');
 const { supabase } = require('./config/supabase');
 
 
 const app = express();
 const PORT = process.env.PORT || 3002;
+const JWT_SECRET = process.env.JWT_SECRET || 'aurumvice_fallback_secret';
+const ADMIN_EMAIL = 'admin@aurumvice.com';
 
-// Middleware
-app.use(cors());
+// Middleware - CORS dengan origin spesifik
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',').map(s => s.trim());
+app.use(cors({
+    origin: function (origin, callback) {
+        // Allow requests with no origin (mobile apps, curl, etc)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(null, true); // Tetap izinkan untuk fleksibilitas dev, tapi log
+    },
+    credentials: true
+}));
 app.use(express.json());
+
+// --- Auth Middleware ---
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token) {
+        return res.status(401).json({ error: 'Akses ditolak. Token tidak ditemukan.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded; // { id, email, role }
+        next();
+    } catch (err) {
+        return res.status(403).json({ error: 'Token tidak valid atau sudah kedaluwarsa.' });
+    }
+};
+
+// Middleware khusus admin
+const requireAdmin = (req, res, next) => {
+    if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Akses ditolak. Hanya admin yang diizinkan.' });
+    }
+    next();
+};
 
 // Initialize DB for Serverless Environment (Vercel)
 let isDbInitialized = false;
@@ -109,7 +151,7 @@ app.get('/api/products/:id', catchAsync(async (req, res) => {
 }));
 
 // Create product
-app.post('/api/products', upload.array('imageFiles', 5), catchAsync(async (req, res) => {
+app.post('/api/products', authenticateToken, requireAdmin, upload.array('imageFiles', 5), catchAsync(async (req, res) => {
     const pool = await getPool();
     const { name, description, price, category } = req.body;
     let mainImage = '';
@@ -158,14 +200,14 @@ app.post('/api/products', upload.array('imageFiles', 5), catchAsync(async (req, 
 
 
 // Delete product
-app.delete('/api/products/:id', catchAsync(async (req, res) => {
+app.delete('/api/products/:id', authenticateToken, requireAdmin, catchAsync(async (req, res) => {
     const pool = await getPool();
     await pool.query("DELETE FROM products WHERE id = $1", [req.params.id]);
     res.json({ message: "Product deleted successfully" });
 }));
 
 // Update product
-app.put('/api/products/:id', upload.array('imageFiles', 5), catchAsync(async (req, res) => {
+app.put('/api/products/:id', authenticateToken, requireAdmin, upload.array('imageFiles', 5), catchAsync(async (req, res) => {
     const pool = await getPool();
     const productId = parseInt(req.params.id);
     const { name, description, price, category } = req.body;
@@ -220,40 +262,42 @@ app.put('/api/products/:id', upload.array('imageFiles', 5), catchAsync(async (re
 }));
 
 // --- Cart Routes ---
-app.get('/api/cart', catchAsync(async (req, res) => {
+app.get('/api/cart', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
     const query = `
         SELECT c.id, c.quantity, p.id as product_id, p.name, p.price, p.image 
         FROM cart c 
         JOIN products p ON c.product_id = p.id
+        WHERE c.user_id = $1
     `;
-    const { rows } = await pool.query(query);
+    const { rows } = await pool.query(query, [req.user.id]);
     res.json(rows);
 }));
 
-app.post('/api/cart', catchAsync(async (req, res) => {
+app.post('/api/cart', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
     const { product_id, quantity } = req.body;
-    const { rows } = await pool.query("SELECT * FROM cart WHERE product_id = $1", [product_id]);
+    const userId = req.user.id;
+    const { rows } = await pool.query("SELECT * FROM cart WHERE product_id = $1 AND user_id = $2", [product_id, userId]);
     
     if (rows.length > 0) {
         await pool.query("UPDATE cart SET quantity = quantity + $1 WHERE id = $2", [quantity, rows[0].id]);
         res.json({ message: "Cart updated" });
     } else {
-        const { rows: result } = await pool.query("INSERT INTO cart (product_id, quantity) VALUES ($1, $2) RETURNING id", [product_id, quantity]);
+        const { rows: result } = await pool.query("INSERT INTO cart (product_id, quantity, user_id) VALUES ($1, $2, $3) RETURNING id", [product_id, quantity, userId]);
         res.status(201).json({ id: result[0].id });
     }
 }));
 
-app.delete('/api/cart/:id', catchAsync(async (req, res) => {
+app.delete('/api/cart/:id', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
-    await pool.query("DELETE FROM cart WHERE id = $1", [req.params.id]);
+    await pool.query("DELETE FROM cart WHERE id = $1 AND user_id = $2", [req.params.id, req.user.id]);
     res.json({ message: "Item removed from cart" });
 }));
 
-app.delete('/api/cart', catchAsync(async (req, res) => {
+app.delete('/api/cart', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
-    await pool.query("DELETE FROM cart");
+    await pool.query("DELETE FROM cart WHERE user_id = $1", [req.user.id]);
     res.json({ message: "Cart cleared" });
 }));
 
@@ -263,35 +307,68 @@ app.post('/api/register', catchAsync(async (req, res) => {
     const { username, email, password } = req.body;
     if (!username || !email || !password) return res.status(400).json({ error: "Missing fields" });
 
-    const { rows } = await pool.query("INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id", [username, email, password]);
+    if (password.length < 6) {
+        return res.status(400).json({ error: "Password minimal 6 karakter" });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const { rows } = await pool.query("INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id", [username, email, hashedPassword]);
     res.status(201).json({ id: rows[0].id, username, email });
 }));
 
 app.post('/api/login', catchAsync(async (req, res) => {
     const pool = await getPool();
     const { email, password } = req.body;
-    const { rows } = await pool.query("SELECT id, username, email, address FROM users WHERE email = $1 AND password = $2", [email, password]);
+    
+    // Ambil user beserta password hash
+    const { rows } = await pool.query("SELECT id, username, email, password, address FROM users WHERE email = $1", [email]);
     
     if (rows.length === 0) return res.status(401).json({ error: "Invalid credentials" });
-    res.json({ message: "Login successful", user: rows[0] });
+
+    const user = rows[0];
+    
+    // Bandingkan password dengan hash
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+    
+    // Tentukan role
+    const role = user.email === ADMIN_EMAIL ? 'admin' : 'user';
+    
+    // Generate JWT token
+    const token = jwt.sign(
+        { id: user.id, email: user.email, role },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+    );
+
+    // Jangan kirim password ke client
+    const { password: _, ...userWithoutPassword } = user;
+    res.json({ message: "Login successful", user: { ...userWithoutPassword, role }, token });
 }));
 
 // --- Profile Routes ---
-app.get('/api/users', catchAsync(async (req, res) => {
+app.get('/api/users', authenticateToken, requireAdmin, catchAsync(async (req, res) => {
     const pool = await getPool();
     const { rows } = await pool.query("SELECT id, username, email, address, created_at FROM users ORDER BY created_at DESC");
     res.json(rows);
 }));
 
-app.get('/api/users/:id', catchAsync(async (req, res) => {
+app.get('/api/users/:id', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
     const { rows } = await pool.query("SELECT id, username, email, address FROM users WHERE id = $1", [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ error: "User not found" });
     res.json(rows[0]);
 }));
 
-app.put('/api/users/:id', catchAsync(async (req, res) => {
+app.put('/api/users/:id', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
+    // User hanya bisa update profil sendiri (kecuali admin)
+    if (req.user.role !== 'admin' && req.user.id !== parseInt(req.params.id)) {
+        return res.status(403).json({ error: "Tidak diizinkan mengubah profil orang lain" });
+    }
     const { username, email, address } = req.body;
     await pool.query("UPDATE users SET username = $1, email = $2, address = $3 WHERE id = $4", [username, email, address, req.params.id]);
     res.json({ message: "Profile updated" });
@@ -306,7 +383,7 @@ app.get('/api/about', catchAsync(async (req, res) => {
     res.json(contentMap);
 }));
 
-app.put('/api/about', catchAsync(async (req, res) => {
+app.put('/api/about', authenticateToken, requireAdmin, catchAsync(async (req, res) => {
     const pool = await getPool();
     for (const [key, data] of Object.entries(req.body)) {
         await pool.query("UPDATE about_content SET title = $1, description = $2 WHERE section_key = $3", [data.title, data.description, key]);
@@ -318,7 +395,7 @@ app.put('/api/about', catchAsync(async (req, res) => {
 // --- Order Routes ---
 
 // Create Order (Checkout)
-app.post('/api/orders', catchAsync(async (req, res) => {
+app.post('/api/orders', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
     const { 
         user_id, 
@@ -351,9 +428,8 @@ app.post('/api/orders', catchAsync(async (req, res) => {
         );
     }
 
-    // 3. Clear cart (optional: if user_id is provided, we might want to clear specific cart items, 
-    // but here we just clear the global cart for simplicity as the current system doesn't have multi-user cart isolation yet)
-    await pool.query("DELETE FROM cart");
+    // 3. Clear cart for this user
+    await pool.query("DELETE FROM cart WHERE user_id = $1", [req.user.id]);
 
     // 4. Create notification for admin (using user_id null or 1 as admin for now)
     await createNotification(1, `Pesanan baru #${orderId} dari ${client_name}`, 'order');
@@ -362,7 +438,7 @@ app.post('/api/orders', catchAsync(async (req, res) => {
 }));
 
 // Get all orders (Admin)
-app.get('/api/orders', catchAsync(async (req, res) => {
+app.get('/api/orders', authenticateToken, requireAdmin, catchAsync(async (req, res) => {
     const pool = await getPool();
     const { rows: orders } = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
     
@@ -381,7 +457,7 @@ app.get('/api/orders', catchAsync(async (req, res) => {
 }));
 
 // Get single order details
-app.get('/api/orders/:id', catchAsync(async (req, res) => {
+app.get('/api/orders/:id', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
     const { rows: orders } = await pool.query("SELECT * FROM orders WHERE id = $1", [req.params.id]);
     
@@ -400,7 +476,7 @@ app.get('/api/orders/:id', catchAsync(async (req, res) => {
 }));
 
 // Get all orders for a specific user
-app.get('/api/orders/user/:userId', catchAsync(async (req, res) => {
+app.get('/api/orders/user/:userId', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
     const { rows: orders } = await pool.query("SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC", [req.params.userId]);
     
@@ -419,7 +495,7 @@ app.get('/api/orders/user/:userId', catchAsync(async (req, res) => {
 }));
 
 // Update order status (Admin)
-app.put('/api/orders/:id/status', catchAsync(async (req, res) => {
+app.put('/api/orders/:id/status', authenticateToken, requireAdmin, catchAsync(async (req, res) => {
     const pool = await getPool();
     const { status } = req.body;
     const { rows: orders } = await pool.query("UPDATE orders SET status = $1 WHERE id = $2 RETURNING user_id", [status, req.params.id]);
@@ -432,7 +508,7 @@ app.put('/api/orders/:id/status', catchAsync(async (req, res) => {
 }));
 
 // Cancel Order (Client)
-app.put('/api/orders/:id/cancel', catchAsync(async (req, res) => {
+app.put('/api/orders/:id/cancel', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
     const orderId = req.params.id;
     
@@ -453,7 +529,7 @@ app.put('/api/orders/:id/cancel', catchAsync(async (req, res) => {
 }));
 
 // Upload Payment Proof
-app.post('/api/orders/:id/payment', upload.single('paymentProof'), catchAsync(async (req, res) => {
+app.post('/api/orders/:id/payment', authenticateToken, upload.single('paymentProof'), catchAsync(async (req, res) => {
     const pool = await getPool();
     const orderId = req.params.id;
     
@@ -497,7 +573,7 @@ app.post('/api/orders/:id/payment', upload.single('paymentProof'), catchAsync(as
 }));
 
 // Update Payment Status (Admin)
-app.put('/api/orders/:id/payment-status', catchAsync(async (req, res) => {
+app.put('/api/orders/:id/payment-status', authenticateToken, requireAdmin, catchAsync(async (req, res) => {
     const pool = await getPool();
     const { payment_status } = req.body;
     const { rows: orders } = await pool.query("UPDATE orders SET payment_status = $1 WHERE id = $2 RETURNING user_id", [payment_status, req.params.id]);
@@ -510,11 +586,7 @@ app.put('/api/orders/:id/payment-status', catchAsync(async (req, res) => {
 }));
 
 // Delete Order (Admin Only)
-app.get('/api/orders/:id', catchAsync(async (req, res) => {
-    // This is the existing GET route, I'll add the DELETE route after it
-}));
-
-app.delete('/api/orders/:id', catchAsync(async (req, res) => {
+app.delete('/api/orders/:id', authenticateToken, requireAdmin, catchAsync(async (req, res) => {
     const pool = await getPool();
     // Items will be deleted automatically due to ON DELETE CASCADE on order_id
     await pool.query("DELETE FROM orders WHERE id = $1", [req.params.id]);
@@ -523,7 +595,7 @@ app.delete('/api/orders/:id', catchAsync(async (req, res) => {
 
 // --- Tracking Routes ---
 
-app.post('/api/orders/:id/tracking', catchAsync(async (req, res) => {
+app.post('/api/orders/:id/tracking', authenticateToken, requireAdmin, catchAsync(async (req, res) => {
     const pool = await getPool();
     const { status_update, location } = req.body;
     const orderId = req.params.id;
@@ -546,7 +618,7 @@ app.post('/api/orders/:id/tracking', catchAsync(async (req, res) => {
     res.status(201).json({ message: "Tracking log added" });
 }));
 
-app.put('/api/orders/:id/tracking-info', catchAsync(async (req, res) => {
+app.put('/api/orders/:id/tracking-info', authenticateToken, requireAdmin, catchAsync(async (req, res) => {
     const pool = await getPool();
     const { tracking_number, shipping_courier } = req.body;
     await pool.query(
@@ -559,19 +631,19 @@ app.put('/api/orders/:id/tracking-info', catchAsync(async (req, res) => {
 
 // --- Notification Routes ---
 
-app.get('/api/notifications/:userId', catchAsync(async (req, res) => {
+app.get('/api/notifications/:userId', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
     const { rows } = await pool.query("SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50", [req.params.userId]);
     res.json(rows);
 }));
 
-app.put('/api/notifications/:id/read', catchAsync(async (req, res) => {
+app.put('/api/notifications/:id/read', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
     await pool.query("UPDATE notifications SET is_read = TRUE WHERE id = $1", [req.params.id]);
     res.json({ message: "Notification marked as read" });
 }));
 
-app.put('/api/notifications/read-all/:userId', catchAsync(async (req, res) => {
+app.put('/api/notifications/read-all/:userId', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
     await pool.query("UPDATE notifications SET is_read = TRUE WHERE user_id = $1", [req.params.userId]);
     res.json({ message: "All notifications marked as read" });

@@ -1,6 +1,24 @@
 export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
 export const IMAGE_BASE_URL = BASE_URL.replace('/api', '');
 
+// Helper untuk mendapatkan token dari localStorage
+const getToken = () => {
+    const token = localStorage.getItem('token');
+    return token;
+};
+
+// Helper untuk membuat headers dengan auth token
+const authHeaders = (extraHeaders = {}) => {
+    const headers = { ...extraHeaders };
+    const token = getToken();
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+};
+
+const jsonAuthHeaders = () => authHeaders({ 'Content-Type': 'application/json' });
+
 export const getImgUrl = (url, placeholder = '800x1000?text=AURUMVICE') => {
     if (!url) return `https://via.placeholder.com/${placeholder}`;
     
@@ -23,6 +41,16 @@ export const getImgUrl = (url, placeholder = '800x1000?text=AURUMVICE') => {
 const handleResponse = async (response) => {
     const data = await response.json();
     if (!response.ok) {
+        // Jika token expired/invalid, logout otomatis
+        if (response.status === 401 || response.status === 403) {
+            // Jangan auto-logout untuk login/register endpoints
+            const url = response.url || '';
+            if (!url.includes('/login') && !url.includes('/register')) {
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                window.dispatchEvent(new Event('auth-logout'));
+            }
+        }
         throw new Error(data.error || 'Something went wrong');
     }
     return data;
@@ -43,28 +71,38 @@ export const api = {
         return handleResponse(res);
     },
 
-    // Cart
+    // Cart (perlu auth)
     async getCart() {
-        const res = await fetch(`${BASE_URL}/cart`);
+        const token = getToken();
+        if (!token) return []; // Tidak login = cart kosong
+        const res = await fetch(`${BASE_URL}/cart`, {
+            headers: authHeaders()
+        });
         return handleResponse(res);
     },
 
     async addToCart(product_id, quantity = 1) {
         const res = await fetch(`${BASE_URL}/cart`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: jsonAuthHeaders(),
             body: JSON.stringify({ product_id, quantity })
         });
         return handleResponse(res);
     },
 
     async removeFromCart(id) {
-        const res = await fetch(`${BASE_URL}/cart/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${BASE_URL}/cart/${id}`, { 
+            method: 'DELETE',
+            headers: authHeaders()
+        });
         return handleResponse(res);
     },
 
     async clearCart() {
-        const res = await fetch(`${BASE_URL}/cart`, { method: 'DELETE' });
+        const res = await fetch(`${BASE_URL}/cart`, { 
+            method: 'DELETE',
+            headers: authHeaders()
+        });
         return handleResponse(res);
     },
 
@@ -89,19 +127,23 @@ export const api = {
 
     // User
     async getUsers() {
-        const res = await fetch(`${BASE_URL}/users`);
+        const res = await fetch(`${BASE_URL}/users`, {
+            headers: authHeaders()
+        });
         return handleResponse(res);
     },
 
     async getUser(id) {
-        const res = await fetch(`${BASE_URL}/users/${id}`);
+        const res = await fetch(`${BASE_URL}/users/${id}`, {
+            headers: authHeaders()
+        });
         return handleResponse(res);
     },
 
     async updateUser(id, data) {
         const res = await fetch(`${BASE_URL}/users/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: jsonAuthHeaders(),
             body: JSON.stringify(data)
         });
         return handleResponse(res);
@@ -116,7 +158,7 @@ export const api = {
     async updateAbout(data) {
         const res = await fetch(`${BASE_URL}/about`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: jsonAuthHeaders(),
             body: JSON.stringify(data)
         });
         return handleResponse(res);
@@ -126,31 +168,37 @@ export const api = {
     async createOrder(orderData) {
         const res = await fetch(`${BASE_URL}/orders`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: jsonAuthHeaders(),
             body: JSON.stringify(orderData)
         });
         return handleResponse(res);
     },
 
     async getOrders() {
-        const res = await fetch(`${BASE_URL}/orders`);
+        const res = await fetch(`${BASE_URL}/orders`, {
+            headers: authHeaders()
+        });
         return handleResponse(res);
     },
 
     async getOrder(id) {
-        const res = await fetch(`${BASE_URL}/orders/${id}`);
+        const res = await fetch(`${BASE_URL}/orders/${id}`, {
+            headers: authHeaders()
+        });
         return handleResponse(res);
     },
 
     async getUserOrders(userId) {
-        const res = await fetch(`${BASE_URL}/orders/user/${userId}`);
+        const res = await fetch(`${BASE_URL}/orders/user/${userId}`, {
+            headers: authHeaders()
+        });
         return handleResponse(res);
     },
 
     async updateOrderStatus(id, status) {
         const res = await fetch(`${BASE_URL}/orders/${id}/status`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: jsonAuthHeaders(),
             body: JSON.stringify({ status })
         });
         return handleResponse(res);
@@ -158,7 +206,8 @@ export const api = {
 
     async cancelOrder(id) {
         const res = await fetch(`${BASE_URL}/orders/${id}/cancel`, {
-            method: 'PUT'
+            method: 'PUT',
+            headers: authHeaders()
         });
         return handleResponse(res);
     },
@@ -168,6 +217,7 @@ export const api = {
         formData.append('paymentProof', file);
         const res = await fetch(`${BASE_URL}/orders/${id}/payment`, {
             method: 'POST',
+            headers: authHeaders(), // Jangan set Content-Type, biarkan browser auto-set untuk FormData
             body: formData
         });
         return handleResponse(res);
@@ -176,7 +226,7 @@ export const api = {
     async updatePaymentStatus(id, payment_status) {
         const res = await fetch(`${BASE_URL}/orders/${id}/payment-status`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: jsonAuthHeaders(),
             body: JSON.stringify({ payment_status })
         });
         return handleResponse(res);
@@ -184,24 +234,33 @@ export const api = {
 
     async deleteOrder(id) {
         const res = await fetch(`${BASE_URL}/orders/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: authHeaders()
         });
         return handleResponse(res);
     },
 
     // Notifications
     async getNotifications(userId) {
-        const res = await fetch(`${BASE_URL}/notifications/${userId}`);
+        const res = await fetch(`${BASE_URL}/notifications/${userId}`, {
+            headers: authHeaders()
+        });
         return handleResponse(res);
     },
 
     async markAsRead(id) {
-        const res = await fetch(`${BASE_URL}/notifications/${id}/read`, { method: 'PUT' });
+        const res = await fetch(`${BASE_URL}/notifications/${id}/read`, { 
+            method: 'PUT',
+            headers: authHeaders()
+        });
         return handleResponse(res);
     },
 
     async markAllAsRead(userId) {
-        const res = await fetch(`${BASE_URL}/notifications/read-all/${userId}`, { method: 'PUT' });
+        const res = await fetch(`${BASE_URL}/notifications/read-all/${userId}`, { 
+            method: 'PUT',
+            headers: authHeaders()
+        });
         return handleResponse(res);
     },
 
@@ -209,7 +268,7 @@ export const api = {
     async addTrackingLog(id, logData) {
         const res = await fetch(`${BASE_URL}/orders/${id}/tracking`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: jsonAuthHeaders(),
             body: JSON.stringify(logData)
         });
         return handleResponse(res);
@@ -218,8 +277,35 @@ export const api = {
     async updateTrackingInfo(id, trackingData) {
         const res = await fetch(`${BASE_URL}/orders/${id}/tracking-info`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: jsonAuthHeaders(),
             body: JSON.stringify(trackingData)
+        });
+        return handleResponse(res);
+    },
+
+    // Admin Products (perlu auth)
+    async createProduct(formData) {
+        const res = await fetch(`${BASE_URL}/products`, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: formData
+        });
+        return handleResponse(res);
+    },
+
+    async updateProduct(id, formData) {
+        const res = await fetch(`${BASE_URL}/products/${id}`, {
+            method: 'PUT',
+            headers: authHeaders(),
+            body: formData
+        });
+        return handleResponse(res);
+    },
+
+    async deleteProduct(id) {
+        const res = await fetch(`${BASE_URL}/products/${id}`, {
+            method: 'DELETE',
+            headers: authHeaders()
         });
         return handleResponse(res);
     }

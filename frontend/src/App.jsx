@@ -91,8 +91,18 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     setUser(null);
   };
+
+  // Listen for forced logout (token expired/invalid)
+  useEffect(() => {
+    const handleForcedLogout = () => {
+      setUser(null);
+    };
+    window.addEventListener('auth-logout', handleForcedLogout);
+    return () => window.removeEventListener('auth-logout', handleForcedLogout);
+  }, []);
 
   return (
     <Router>

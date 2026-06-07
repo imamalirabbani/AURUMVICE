@@ -16,7 +16,9 @@ const Login = ({ onLogin }) => {
     try {
       const data = await api.login(email, password);
       
+      // Simpan user dan JWT token
       localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('token', data.token);
       onLogin(data.user);
       navigate('/');
     } catch (err) {

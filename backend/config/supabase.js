@@ -1,7 +1,12 @@
 const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
-const SUPABASE_URL = 'https://fhljkxnptsbiopncbmmg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZobGpreG5wdHNiaW9wbmNibW1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjgwMjcsImV4cCI6MjA5MzcwNDAyN30.DqtcVfDTQS0zxV2bA5RXvX6aIYKfTDf29E7QuLXYwQE';
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    console.error('Missing SUPABASE_URL or SUPABASE_ANON_KEY in environment variables');
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 

@@ -1,11 +1,13 @@
 const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
 const dbConfig = {
-    user: 'postgres.fhljkxnptsbiopncbmmg',
-    host: 'aws-1-ap-southeast-1.pooler.supabase.com',
-    database: 'postgres',
-    password: 'zdQrUSU/6AYepTz', // Special character / is handled directly
-    port: 6543,
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: parseInt(process.env.DB_PORT) || 6543,
     ssl: {
         rejectUnauthorized: false
     }
@@ -66,6 +68,7 @@ async function initDatabase() {
     await runQuery("Cart Table", `CREATE TABLE IF NOT EXISTS cart (
         id SERIAL PRIMARY KEY,
         product_id INT REFERENCES products(id) ON DELETE CASCADE,
+        user_id INT REFERENCES users(id) ON DELETE CASCADE,
         quantity INT
     )`);
 
@@ -149,6 +152,14 @@ async function initDatabase() {
         // Ignore if exists
     }
 
+    // Add user_id to cart if missing
+    try {
+        await p.query("ALTER TABLE cart ADD COLUMN user_id INT REFERENCES users(id) ON DELETE CASCADE");
+        console.log("Column user_id added to cart.");
+    } catch (err) {
+        // Ignore if exists
+    }
+
     // Default Data
     try {
         const { rows: aboutRows } = await p.query("SELECT * FROM about_content");
@@ -162,11 +173,33 @@ async function initDatabase() {
 
         const { rows: userRows } = await p.query("SELECT * FROM users WHERE username = $1", ['admin']);
         if (userRows.length === 0) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash('admin123', salt);
             await p.query(
                 "INSERT INTO users (username, email, password, address) VALUES ($1, $2, $3, $4)",
-                ['admin', 'admin@aurumvice.com', 'admin123', 'AURUMVICE HQ']
+                ['admin', 'admin@aurumvice.com', hashedPassword, 'AURUMVICE HQ']
             );
-            console.log("Default admin user created");
+            console.log("Default admin user created (password hashed)");
+        } else {
+            // Migrasi otomatis: jika password admin masih plaintext, hash ulang
+            const adminUser = userRows[0];
+            if (!adminUser.password.startsWith('$2a$') && !adminUser.password.startsWith('$2b$')) {
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(adminUser.password, salt);
+                await p.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, adminUser.id]);
+                console.log("Admin password migrated from plaintext to hashed");
+            }
+        }
+
+        // Migrasi otomatis: hash semua password user yang masih plaintext
+        const { rows: allUsers } = await p.query("SELECT id, username, password FROM users");
+        for (const u of allUsers) {
+            if (!u.password.startsWith('$2a$') && !u.password.startsWith('$2b$')) {
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(u.password, salt);
+                await p.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, u.id]);
+                console.log(`Password for user "${u.username}" migrated to hashed`);
+            }
         }
     } catch (err) {
         console.error("Default data insertion failed:", err.message);

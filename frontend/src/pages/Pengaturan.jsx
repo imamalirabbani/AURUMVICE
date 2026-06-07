@@ -6,6 +6,15 @@ import { BASE_URL, IMAGE_BASE_URL } from '../services/api';
 const API_BASE = IMAGE_BASE_URL;
 const API_URL = BASE_URL;
 
+// Helper untuk auth headers
+const getAuthHeaders = (contentType = null) => {
+    const headers = {};
+    const token = localStorage.getItem('token');
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (contentType) headers['Content-Type'] = contentType;
+    return headers;
+};
+
 const Pengaturan = ({ user, onLogout, onUpdateUser }) => {
     const [products, setProducts] = useState([]);
     const [activeTab, setActiveTab] = useState(user?.username === 'admin' ? 'list' : 'account');
@@ -61,7 +70,9 @@ const Pengaturan = ({ user, onLogout, onUpdateUser }) => {
     const fetchUserProfile = useCallback(async () => {
         if (!user?.id) return;
         try {
-            const res = await fetch(`${API_BASE}/api/users/${user.id}`);
+            const res = await fetch(`${API_BASE}/api/users/${user.id}`, {
+                headers: getAuthHeaders()
+            });
             if (res.ok) {
                 const data = await res.json();
                 setUserProfile({
@@ -213,7 +224,7 @@ const Pengaturan = ({ user, onLogout, onUpdateUser }) => {
                 : `${API_BASE}/api/products`;
             const method = editingProduct ? 'PUT' : 'POST';
 
-            const res = await fetch(url, { method, body: formData });
+            const res = await fetch(url, { method, body: formData, headers: getAuthHeaders() });
 
             if (res.ok) {
                 showTemporaryMessage(editingProduct ? 'Product updated successfully!' : 'Product added successfully!');
@@ -235,7 +246,7 @@ const Pengaturan = ({ user, onLogout, onUpdateUser }) => {
         try {
             const res = await fetch(`${API_BASE}/api/about`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders('application/json'),
                 body: JSON.stringify(aboutContent)
             });
 
@@ -255,7 +266,7 @@ const Pengaturan = ({ user, onLogout, onUpdateUser }) => {
         try {
             const res = await fetch(`${API_BASE}/api/users/${user.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders('application/json'),
                 body: JSON.stringify(userProfile)
             });
 
@@ -278,7 +289,7 @@ const Pengaturan = ({ user, onLogout, onUpdateUser }) => {
         if (!window.confirm('Are you sure you want to delete this product?')) return;
 
         try {
-            const res = await fetch(`${API_BASE}/api/products/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE}/api/products/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
 
             if (res.ok) {
                 showTemporaryMessage('Product deleted successfully');

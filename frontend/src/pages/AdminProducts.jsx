@@ -16,6 +16,7 @@ const AdminProducts = ({ user }) => {
     stock: '',
     image: ''
   });
+  const [imageFiles, setImageFiles] = useState([]);
 
   useEffect(() => {
     fetchProducts();
@@ -40,18 +41,38 @@ const AdminProducts = ({ user }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // For now, using existing API methods. 
-      // If there's no updateProduct/createProduct in api.js, we'll need to add them.
-      alert("Fitur simpan produk sedang diintegrasikan dengan backend.");
+      const submitData = new FormData();
+      submitData.append('name', formData.name);
+      submitData.append('description', formData.description);
+      submitData.append('price', formData.price);
+      submitData.append('category', formData.category);
+      
+      if (imageFiles.length > 0) {
+        imageFiles.forEach(file => submitData.append('imageFiles', file));
+      }
+
+      if (editingProduct) {
+        await api.updateProduct(editingProduct.id, submitData);
+      } else {
+        await api.createProduct(submitData);
+      }
+      
       setShowModal(false);
+      setImageFiles([]);
+      fetchProducts();
     } catch (err) {
-      alert("Gagal simpan produk");
+      alert("Gagal simpan produk: " + err.message);
     }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Hapus produk ini?")) {
-      alert("Fitur hapus produk sedang diintegrasikan.");
+      try {
+        await api.deleteProduct(id);
+        fetchProducts();
+      } catch (err) {
+        alert("Gagal hapus produk: " + err.message);
+      }
     }
   };
 
@@ -155,8 +176,9 @@ const AdminProducts = ({ user }) => {
                   <textarea name="description" value={formData.description} onChange={handleInputChange} rows="4" required></textarea>
                 </div>
                 <div className="input-group">
-                  <label>URL Gambar (Supabase/URL)</label>
-                  <input type="text" name="image" value={formData.image} onChange={handleInputChange} required />
+                  <label>Gambar Produk (max 5 file)</label>
+                  <input type="file" accept="image/*" multiple onChange={(e) => setImageFiles(Array.from(e.target.files).slice(0, 5))} />
+                  {imageFiles.length > 0 && <span style={{fontSize:'0.8rem',color:'#666'}}>{imageFiles.length} file dipilih</span>}
                 </div>
                 <button type="submit" className="btn btn-primary w-full">SIMPAN PRODUK</button>
               </form>

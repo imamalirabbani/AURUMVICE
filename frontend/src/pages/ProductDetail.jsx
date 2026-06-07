@@ -32,6 +32,13 @@ const ProductDetail = ({ onAddToCart }) => {
   };
 
   const handleAddToCart = async (isBuyNow = false) => {
+    // Cek apakah user sudah login
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert("Silakan login terlebih dahulu untuk menambah ke keranjang");
+      navigate('/login');
+      return;
+    }
     try {
       await api.addToCart(product.id, quantity);
       onAddToCart();
