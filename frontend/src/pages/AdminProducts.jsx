@@ -177,10 +177,23 @@ const AdminProducts = ({ user, onLogout }) => {
                 </div>
                 <div className="input-group">
                   <label>Gambar Produk (max 5 file)</label>
-                  <input type="file" accept="image/*" multiple onChange={(e) => setImageFiles(Array.from(e.target.files).slice(0, 5))} />
-                  {imageFiles.length > 0 && <span style={{fontSize:'0.8rem',color:'#666'}}>{imageFiles.length} file dipilih</span>}
+                  <label className="file-input-wrapper">
+                    <ImageIcon size={24} color="#C5A059" style={{ marginBottom: '8px' }} />
+                    <span style={{ display: 'block', fontSize: '0.8rem', color: '#666' }}>
+                      {imageFiles.length > 0 ? `${imageFiles.length} file dipilih` : 'Klik atau seret gambar ke sini'}
+                    </span>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      multiple 
+                      style={{ display: 'none' }}
+                      onChange={(e) => setImageFiles(Array.from(e.target.files).slice(0, 5))} 
+                    />
+                  </label>
                 </div>
-                <button type="submit" className="btn btn-primary w-full">SIMPAN PRODUK</button>
+                <button type="submit" className="submit-btn-premium">
+                  {editingProduct ? 'PERBARUI PRODUK' : 'SIMPAN PRODUK BARU'}
+                </button>
               </form>
             </div>
           </div>
@@ -193,12 +206,140 @@ const AdminProducts = ({ user, onLogout }) => {
         .product-info-mini { display: flex; flex-direction: column; }
         .p-id { font-size: 0.6rem; color: #999; }
         .badge-category { background: #f0f0f0; padding: 4px 10px; font-size: 0.7rem; border-radius: 20px; text-transform: uppercase; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { width: 100%; max-width: 500px; padding: 2rem; background: white; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .w-full { width: 100%; margin-top: 1rem; }
-        textarea { padding: 12px; border: 1px solid #ddd; font-family: inherit; }
+        
+        .modal-overlay { 
+          position: fixed; 
+          inset: 0; 
+          background: rgba(0,0,0,0.8); 
+          backdrop-filter: blur(8px);
+          display: flex; 
+          justify-content: center; 
+          align-items: center; 
+          z-index: 2000; 
+          animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .modal-content { 
+          width: 90%; 
+          max-width: 600px; 
+          padding: 3rem; 
+          background: white; 
+          position: relative;
+          box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+          animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+          from { transform: translateY(30px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header { 
+          display: flex; 
+          justify-content: space-between; 
+          align-items: center; 
+          margin-bottom: 2.5rem; 
+          border-bottom: 2px solid #C5A059;
+          padding-bottom: 1rem;
+        }
+
+        .modal-header h3 {
+          font-size: 1.25rem;
+          letter-spacing: 4px;
+          font-weight: 800;
+          color: #111;
+          margin: 0;
+        }
+
+        .close-btn {
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          color: #999;
+          transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+          color: #111;
+        }
+
+        .product-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .input-group label {
+          font-size: 0.65rem;
+          font-weight: 800;
+          color: #888;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+        }
+
+        .input-group input, .input-group textarea {
+          padding: 12px 0;
+          border: none;
+          border-bottom: 1px solid #ddd;
+          font-family: inherit;
+          font-size: 0.95rem;
+          background: transparent;
+          transition: all 0.3s;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+          outline: none;
+          border-bottom-color: #C5A059;
+        }
+
+        .form-row { 
+          display: grid; 
+          grid-template-columns: 1fr 1fr; 
+          gap: 2rem; 
+        }
+
+        .submit-btn-premium {
+          margin-top: 1rem;
+          padding: 1.2rem;
+          background: #111;
+          color: white;
+          border: none;
+          font-weight: 700;
+          letter-spacing: 3px;
+          cursor: pointer;
+          transition: all 0.3s;
+          text-transform: uppercase;
+        }
+
+        .submit-btn-premium:hover {
+          background: #C5A059;
+          transform: translateY(-2px);
+          box-shadow: 0 10px 20px rgba(197, 160, 89, 0.3);
+        }
+
+        .file-input-wrapper {
+          padding: 20px;
+          border: 2px dashed #eee;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+
+        .file-input-wrapper:hover {
+          border-color: #C5A059;
+          background: #fcfcfc;
+        }
       `}</style>
     </AdminLayout>
   );
