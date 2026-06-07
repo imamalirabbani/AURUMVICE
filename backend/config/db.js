@@ -8,7 +8,10 @@ const dbConfig = {
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
     port: parseInt(process.env.DB_PORT) || (process.env.DB_HOST?.includes('pooler') ? 6543 : 5432),
-    ssl: { rejectUnauthorized: false }
+    ssl: { 
+        rejectUnauthorized: false,
+        ca: process.env.DB_SSL_CA // Optional: if they have a CA cert
+    }
 };
 
 let pool;
