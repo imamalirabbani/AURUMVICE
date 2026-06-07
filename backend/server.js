@@ -58,23 +58,32 @@ const requireAdmin = (req, res, next) => {
 
 // Initialize DB for Serverless Environment (Vercel)
 let isDbInitialized = false;
+let isDbInitializing = false;
+
 app.use(async (req, res, next) => {
-    if (!isDbInitialized) {
-        try {
-            console.log("Initializing database schema...");
-            await initDatabase();
-            isDbInitialized = true;
-            console.log("Database schema initialized successfully");
-            next();
-        } catch (err) {
-            console.error("Database Init Error:", err);
-            res.status(500).json({ 
-                error: "Database Initialization Failed",
-                details: err.message
-            });
-        }
-    } else {
+    if (isDbInitialized) return next();
+    
+    if (isDbInitializing) {
+        // Wait for a bit and then give up or just retry
+        return res.status(503).json({ error: "Database is currently initializing. Please refresh in a moment." });
+    }
+
+    isDbInitializing = true;
+    try {
+        console.log("Initializing database schema...");
+        await initDatabase();
+        isDbInitialized = true;
+        console.log("Database schema initialized successfully");
+        isDbInitializing = false;
         next();
+    } catch (err) {
+        isDbInitializing = false;
+        console.error("Database Init Error:", err);
+        res.status(500).json({ 
+            error: "Database Initialization Failed",
+            details: err.message,
+            code: err.code
+        });
     }
 });
 

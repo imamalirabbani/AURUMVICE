@@ -39,9 +39,20 @@ async function initDatabase() {
             await p.query(query);
             console.log(`Success: ${name}`);
         } catch (err) {
-            console.error(`Failed: ${name}`, err.message);
-            // Re-throw if it's not a "already exists" error
-            if (!err.message.includes('already exists')) throw err;
+            // Log full error for server logs
+            console.error(`Failed during ${name}:`, err.message);
+            
+            // Check for various "already exists" patterns
+            const isAlreadyExists = 
+                err.message.includes('already exists') || 
+                err.code === '42P07' || // relation already exists
+                err.code === '42701';   // column already exists
+                
+            if (!isAlreadyExists) {
+                const customErr = new Error(`Error in ${name}: ${err.message}`);
+                customErr.code = err.code;
+                throw customErr;
+            }
         }
     };
 
