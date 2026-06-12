@@ -26,6 +26,16 @@ async function runMigration() {
         )`);
         console.log('Tracking Logs table checked/created.');
 
+        await pool.query(`CREATE TABLE IF NOT EXISTS reviews (
+            id SERIAL PRIMARY KEY,
+            product_id INT REFERENCES products(id) ON DELETE CASCADE,
+            user_id INT REFERENCES users(id) ON DELETE CASCADE,
+            rating INT CHECK (rating >= 1 AND rating <= 5),
+            comment TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+        console.log('Reviews table checked/created.');
+
         // 3. Add columns to Orders table if they don't exist
         const addColumn = async (columnName, definition) => {
             try {
@@ -44,6 +54,14 @@ async function runMigration() {
         await addColumn('payment_proof_url', "TEXT");
         await addColumn('tracking_number', "VARCHAR(100)");
         await addColumn('shipping_courier', "VARCHAR(50)");
+
+        // Add stock to products
+        try {
+            await pool.query("ALTER TABLE products ADD COLUMN stock INT DEFAULT 0");
+            console.log("Column stock added to products.");
+        } catch (err) {
+            if (err.code !== '42701') throw err;
+        }
 
         console.log('Migration completed successfully.');
     } catch (err) {

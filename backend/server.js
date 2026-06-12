@@ -218,7 +218,7 @@ app.get('/api/products/:id', catchAsync(async (req, res) => {
 // Create product
 app.post('/api/products', authenticateToken, requireAdmin, upload.array('imageFiles', 5), catchAsync(async (req, res) => {
     const pool = await getPool();
-    const { name, description, price, category } = req.body;
+    const { name, description, price, category, stock } = req.body;
     let mainImage = '';
     const imageUrls = [];
 
@@ -250,8 +250,8 @@ app.post('/api/products', authenticateToken, requireAdmin, upload.array('imageFi
     }
 
     const { rows } = await pool.query(
-        "INSERT INTO products (name, description, price, category, image) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-        [name, description, price, category, mainImage]
+        "INSERT INTO products (name, description, price, category, image, stock) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+        [name, description, price, category, mainImage, stock || 0]
     );
     
     const productId = rows[0].id;
@@ -275,13 +275,13 @@ app.delete('/api/products/:id', authenticateToken, requireAdmin, catchAsync(asyn
 app.put('/api/products/:id', authenticateToken, requireAdmin, upload.array('imageFiles', 5), catchAsync(async (req, res) => {
     const pool = await getPool();
     const productId = parseInt(req.params.id);
-    const { name, description, price, category } = req.body;
+    const { name, description, price, category, stock } = req.body;
     
     console.log(`Updating product ${productId}...`);
 
     const result = await pool.query(
-        "UPDATE products SET name = $1, description = $2, price = $3, category = $4 WHERE id = $5",
-        [name, description, price, category, productId]
+        "UPDATE products SET name = $1, description = $2, price = $3, category = $4, stock = $5 WHERE id = $6",
+        [name, description, price, category, stock || 0, productId]
     );
 
     if (result.rowCount === 0) {
@@ -421,6 +421,43 @@ app.get('/api/users', authenticateToken, requireAdmin, catchAsync(async (req, re
     res.json(rows);
 }));
 
+app.get('/api/admin/stats', authenticateToken, requireAdmin, catchAsync(async (req, res) => {
+    const pool = await getPool();
+    
+    // 1. Basic Stats
+    const { rows: orderStats } = await pool.query("SELECT COUNT(*) as total_orders, COALESCE(SUM(total_amount), 0) as total_revenue FROM orders WHERE payment_status = 'Paid'");
+    const { rows: userStats } = await pool.query("SELECT COUNT(*) as total_users FROM users");
+    const { rows: productStats } = await pool.query("SELECT COUNT(*) as total_products FROM products");
+    
+    // 2. Orders per Day (Last 7 Days)
+    const { rows: dailyStats } = await pool.query(`
+        SELECT DATE(created_at) as date, COUNT(*) as count, SUM(total_amount) as revenue
+        FROM orders 
+        WHERE created_at > NOW() - INTERVAL '7 days'
+        GROUP BY DATE(created_at)
+        ORDER BY DATE(created_at) ASC
+    `);
+
+    // 3. Top Products
+    const { rows: topProducts } = await pool.query(`
+        SELECT p.name, SUM(oi.quantity) as total_sold
+        FROM order_items oi
+        JOIN products p ON oi.product_id = p.id
+        GROUP BY p.name
+        ORDER BY total_sold DESC
+        LIMIT 5
+    `);
+
+    res.json({
+        total_orders: parseInt(orderStats[0].total_orders),
+        total_revenue: parseFloat(orderStats[0].total_revenue),
+        total_users: parseInt(userStats[0].total_users),
+        total_products: parseInt(productStats[0].total_products),
+        daily_stats: dailyStats,
+        top_products: topProducts
+    });
+}));
+
 app.get('/api/users/:id', authenticateToken, catchAsync(async (req, res) => {
     const pool = await getPool();
     const { rows } = await pool.query("SELECT id, username, email, address FROM users WHERE id = $1", [req.params.id]);
@@ -473,33 +510,59 @@ app.post('/api/orders', authenticateToken, catchAsync(async (req, res) => {
         items,
         total_amount 
     } = req.body;
+    
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
 
-    // 1. Create the order
-    const { rows: orderRows } = await pool.query(
-        `INSERT INTO orders 
-        (user_id, client_name, shipping_address, pic_name, phone_number, notes, payment_method, total_amount) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-        RETURNING id`,
-        [user_id, client_name, shipping_address, pic_name, phone_number, notes, payment_method, total_amount]
-    );
+        // Check stock for all items
+        for (const item of items) {
+            const { rows: productRows } = await client.query("SELECT name, stock FROM products WHERE id = $1 FOR UPDATE", [item.product_id]);
+            if (productRows.length === 0) throw new Error(`Produk tidak ditemukan`);
+            const product = productRows[0];
+            if (product.stock < item.quantity) {
+                throw new Error(`Stok produk "${product.name}" tidak mencukupi (Tersisa: ${product.stock})`);
+            }
+        }
 
-    const orderId = orderRows[0].id;
-
-    // 2. Add items
-    for (const item of items) {
-        await pool.query(
-            "INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase) VALUES ($1, $2, $3, $4)",
-            [orderId, item.product_id, item.quantity, item.price]
+        // 1. Create the order
+        const { rows: orderRows } = await client.query(
+            `INSERT INTO orders 
+            (user_id, client_name, shipping_address, pic_name, phone_number, notes, payment_method, total_amount) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+            RETURNING id`,
+            [user_id, client_name, shipping_address, pic_name, phone_number, notes, payment_method, total_amount]
         );
+
+        const orderId = orderRows[0].id;
+
+        // 2. Add items and reduce stock
+        for (const item of items) {
+            // Update order items
+            await client.query(
+                "INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase) VALUES ($1, $2, $3, $4)",
+                [orderId, item.product_id, item.quantity, item.price]
+            );
+            // Reduce stock
+            await client.query("UPDATE products SET stock = stock - $1 WHERE id = $2", [item.quantity, item.product_id]);
+        }
+
+        // 3. Clear cart for this user
+        await client.query("DELETE FROM cart WHERE user_id = $1", [req.user.id]);
+
+        await client.query('COMMIT');
+
+        // 4. Create notification for admin
+        await createNotification(1, `Pesanan baru #${orderId} dari ${client_name}`, 'order');
+
+        res.status(201).json({ id: orderId, message: "Order placed successfully" });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error("Order process failed:", err);
+        res.status(400).json({ error: err.message });
+    } finally {
+        client.release();
     }
-
-    // 3. Clear cart for this user
-    await pool.query("DELETE FROM cart WHERE user_id = $1", [req.user.id]);
-
-    // 4. Create notification for admin (using user_id null or 1 as admin for now)
-    await createNotification(1, `Pesanan baru #${orderId} dari ${client_name}`, 'order');
-
-    res.status(201).json({ id: orderId, message: "Order placed successfully" });
 }));
 
 // Get all orders (Admin Optimized)
@@ -721,6 +784,81 @@ app.put('/api/notifications/read-all/:userId', authenticateToken, catchAsync(asy
     const pool = await getPool();
     await pool.query("UPDATE notifications SET is_read = TRUE WHERE user_id = $1", [req.params.userId]);
     res.json({ message: "All notifications marked as read" });
+}));
+
+
+// --- Review Routes ---
+
+app.get('/api/products/:id/reviews', catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { rows } = await pool.query(`
+        SELECT r.*, u.username 
+        FROM reviews r 
+        JOIN users u ON r.user_id = u.id 
+        WHERE r.product_id = $1 
+        ORDER BY r.created_at DESC
+    `, [req.params.id]);
+    res.json(rows);
+}));
+
+app.post('/api/reviews', authenticateToken, catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { product_id, rating, comment } = req.body;
+    const userId = req.user.id;
+
+    // Check if user has purchased the product
+    const { rows: purchaseRows } = await pool.query(`
+        SELECT 1 FROM orders o
+        JOIN order_items oi ON o.id = oi.order_id
+        WHERE o.user_id = $1 AND oi.product_id = $2 AND o.status = 'Selesai'
+        LIMIT 1
+    `, [userId, product_id]);
+
+    if (purchaseRows.length === 0) {
+        return res.status(403).json({ error: "Anda hanya dapat memberikan ulasan untuk produk yang sudah Anda beli dan pesanan telah selesai." });
+    }
+
+    // Check if review already exists
+    const { rows: existingRows } = await pool.query("SELECT id FROM reviews WHERE product_id = $1 AND user_id = $2", [product_id, userId]);
+    if (existingRows.length > 0) {
+        return res.status(400).json({ error: "Anda sudah memberikan ulasan untuk produk ini." });
+    }
+
+    await pool.query(
+        "INSERT INTO reviews (product_id, user_id, rating, comment) VALUES ($1, $2, $3, $4)",
+        [product_id, userId, rating, comment]
+    );
+
+    res.status(201).json({ message: "Ulasan berhasil dikirim" });
+}));
+
+
+// --- Wishlist Routes ---
+
+app.get('/api/wishlist', authenticateToken, catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { rows } = await pool.query(`
+        SELECT w.id, p.* FROM wishlist w
+        JOIN products p ON w.product_id = p.id
+        WHERE w.user_id = $1
+    `, [req.user.id]);
+    res.json(rows);
+}));
+
+app.post('/api/wishlist', authenticateToken, catchAsync(async (req, res) => {
+    const pool = await getPool();
+    const { product_id } = req.body;
+    await pool.query(
+        "INSERT INTO wishlist (product_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+        [product_id, req.user.id]
+    );
+    res.status(201).json({ message: "Added to wishlist" });
+}));
+
+app.delete('/api/wishlist/:productId', authenticateToken, catchAsync(async (req, res) => {
+    const pool = await getPool();
+    await pool.query("DELETE FROM wishlist WHERE product_id = $1 AND user_id = $2", [req.params.productId, req.user.id]);
+    res.json({ message: "Removed from wishlist" });
 }));
 
 

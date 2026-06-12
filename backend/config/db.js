@@ -65,7 +65,8 @@ async function initDatabase() {
         description TEXT,
         price NUMERIC(15,2) NOT NULL,
         category VARCHAR(255),
-        image VARCHAR(255)
+        image VARCHAR(255),
+        stock INT DEFAULT 0
     )`);
 
     await runQuery("Users Table", `CREATE TABLE IF NOT EXISTS users (
@@ -139,6 +140,23 @@ async function initDatabase() {
         description TEXT
     )`);
 
+    await runQuery("Reviews Table", `CREATE TABLE IF NOT EXISTS reviews (
+        id SERIAL PRIMARY KEY,
+        product_id INT REFERENCES products(id) ON DELETE CASCADE,
+        user_id INT REFERENCES users(id) ON DELETE CASCADE,
+        rating INT CHECK (rating >= 1 AND rating <= 5),
+        comment TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    await runQuery("Wishlist Table", `CREATE TABLE IF NOT EXISTS wishlist (
+        id SERIAL PRIMARY KEY,
+        product_id INT REFERENCES products(id) ON DELETE CASCADE,
+        user_id INT REFERENCES users(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(product_id, user_id)
+    )`);
+
     // Add missing columns to orders if they don't exist
     const columns = [
         { name: 'payment_status', def: "VARCHAR(20) DEFAULT 'Unpaid'" },
@@ -154,6 +172,14 @@ async function initDatabase() {
         } catch (err) {
             // Ignore if column already exists
         }
+    }
+
+    // Add stock to products if missing
+    try {
+        await p.query("ALTER TABLE products ADD COLUMN stock INT DEFAULT 0");
+        console.log("Column stock added to products.");
+    } catch (err) {
+        // Ignore if exists
     }
 
     // Add created_at to users if missing

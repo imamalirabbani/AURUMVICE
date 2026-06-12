@@ -308,5 +308,53 @@ export const api = {
             headers: authHeaders()
         });
         return handleResponse(res);
+    },
+
+    // Reviews
+    async getReviews(id) {
+        const res = await fetch(`${BASE_URL}/products/${id}/reviews`);
+        return handleResponse(res);
+    },
+
+    async createReview(reviewData) {
+        const res = await fetch(`${BASE_URL}/reviews`, {
+            method: 'POST',
+            headers: jsonAuthHeaders(),
+            body: JSON.stringify(reviewData)
+        });
+        return handleResponse(res);
+    },
+
+    // Wishlist
+    async getWishlist() {
+        const res = await fetch(`${BASE_URL}/wishlist`, {
+            headers: authHeaders()
+        });
+        return handleResponse(res);
+    },
+
+    async addToWishlist(product_id) {
+        const res = await fetch(`${BASE_URL}/wishlist`, {
+            method: 'POST',
+            headers: jsonAuthHeaders(),
+            body: JSON.stringify({ product_id })
+        });
+        return handleResponse(res);
+    },
+
+    async removeFromWishlist(productId) {
+        const res = await fetch(`${BASE_URL}/wishlist/${productId}`, {
+            method: 'DELETE',
+            headers: authHeaders()
+        });
+        return handleResponse(res);
+    },
+
+    // Admin
+    async getAdminStats() {
+        const res = await fetch(`${BASE_URL}/admin/stats`, {
+            headers: authHeaders()
+        });
+        return handleResponse(res);
     }
 };

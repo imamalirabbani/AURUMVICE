@@ -50,6 +50,7 @@ const AdminProducts = ({ user, onLogout }) => {
       if (imageFiles.length > 0) {
         imageFiles.forEach(file => submitData.append('imageFiles', file));
       }
+      submitData.append('stock', formData.stock);
 
       if (editingProduct) {
         await api.updateProduct(editingProduct.id, submitData);
@@ -136,7 +137,7 @@ const AdminProducts = ({ user, onLogout }) => {
                   </td>
                   <td><span className="badge-category">{p.category}</span></td>
                   <td>{formatPrice(p.price)}</td>
-                  <td>{p.stock || 100}</td>
+                  <td>{p.stock}</td>
                   <td>
                     <div className="action-buttons">
                       <button className="btn-icon" onClick={() => openModal(p)}><Edit size={16} /></button>
@@ -169,6 +170,10 @@ const AdminProducts = ({ user, onLogout }) => {
                   <div className="input-group">
                     <label>Harga (IDR)</label>
                     <input type="number" name="price" value={formData.price} onChange={handleInputChange} required />
+                  </div>
+                  <div className="input-group">
+                    <label>Stok</label>
+                    <input type="number" name="stock" value={formData.stock} onChange={handleInputChange} required />
                   </div>
                 </div>
                 <div className="input-group">

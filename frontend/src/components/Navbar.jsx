@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, ShoppingCart, Search, Menu, X, Bell, User } from 'lucide-react';
+import { ShoppingBag, ShoppingCart, Search, Menu, X, Bell, User, Heart } from 'lucide-react';
 import { api } from '../services/api';
 
 const Navbar = ({ cartCount, user }) => {
@@ -80,7 +80,10 @@ const Navbar = ({ cartCount, user }) => {
               <>
                 <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">BAG ({cartCount})</Link>
                 {user && (
-                  <Link to="/my-orders" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PESANAN SAYA</Link>
+                  <>
+                    <Link to="/wishlist" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">WISHLIST</Link>
+                    <Link to="/my-orders" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">PESANAN SAYA</Link>
+                  </>
                 )}
                 {user ? (
                   <Link to="/pengaturan" onClick={() => setIsMenuOpen(false)} className="nav-link-brioni">AKUN</Link>
@@ -142,7 +145,12 @@ const Navbar = ({ cartCount, user }) => {
               </div>
             )}
             {user && (
-              <Link to="/my-orders" className="nav-link-brioni desktop-only">PESANAN SAYA</Link>
+              <>
+                <Link to="/wishlist" className="nav-icon-btn" style={{ marginRight: '1rem' }} aria-label="Wishlist">
+                  <Heart size={18} />
+                </Link>
+                <Link to="/my-orders" className="nav-link-brioni desktop-only">PESANAN SAYA</Link>
+              </>
             )}
             <Link to="/cart" className="nav-link-brioni">
               BAG {cartCount > 0 && <span>({cartCount})</span>}

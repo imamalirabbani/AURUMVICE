@@ -59,7 +59,8 @@ const Checkout = ({ user, onOrderComplete }) => {
       navigate(`/order-success/${result.id}`);
     } catch (err) {
       console.error(err);
-      alert("Gagal memproses pesanan. Silakan coba lagi.");
+      const errorMsg = err.response?.data?.error || "Gagal memproses pesanan. Silakan coba lagi.";
+      alert(errorMsg);
     }
   };
 

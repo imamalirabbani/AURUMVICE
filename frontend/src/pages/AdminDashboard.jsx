@@ -8,29 +8,21 @@ const AdminDashboard = ({ user, onLogout }) => {
     totalOrders: 0,
     totalRevenue: 0,
     totalProducts: 0,
-    pendingPayments: 0
+    totalUsers: 0,
+    daily_stats: [],
+    top_products: []
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const orders = await api.getOrders();
-        const products = await api.getProducts();
-        
-        const totalRevenue = orders
-          .filter(o => o.payment_status === 'Paid')
-          .reduce((sum, o) => sum + parseFloat(o.total_amount), 0);
-          
-        const pendingPayments = orders.filter(o => o.payment_status === 'Pending Verification').length;
-
-        setStats({
-          totalOrders: orders.length,
-          totalRevenue,
-          totalProducts: products.length,
-          pendingPayments
-        });
+        const data = await api.getAdminStats();
+        setStats(data);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchStats();
@@ -41,11 +33,13 @@ const AdminDashboard = ({ user, onLogout }) => {
   };
 
   const statCards = [
-    { label: 'TOTAL PESANAN', value: stats.totalOrders, icon: <ShoppingBag />, color: '#3498db' },
-    { label: 'TOTAL PENDAPATAN', value: formatPrice(stats.totalRevenue), icon: <DollarSign />, color: '#27ae60' },
-    { label: 'TOTAL PRODUK', value: stats.totalProducts, icon: <Package />, color: '#9b59b6' },
-    { label: 'VERIFIKASI PENDING', value: stats.pendingPayments, icon: <TrendingUp />, color: '#e67e22' },
+    { label: 'TOTAL PESANAN', value: stats.total_orders, icon: <ShoppingBag />, color: '#3498db' },
+    { label: 'TOTAL PENDAPATAN', value: formatPrice(stats.total_revenue), icon: <DollarSign />, color: '#27ae60' },
+    { label: 'TOTAL PRODUK', value: stats.total_products, icon: <Package />, color: '#9b59b6' },
+    { label: 'TOTAL USERS', value: stats.total_users, icon: <Users />, color: '#e67e22' },
   ];
+
+  if (loading) return <AdminLayout user={user} onLogout={onLogout}>Loading dashboard...</AdminLayout>;
 
   return (
     <AdminLayout user={user} onLogout={onLogout}>
@@ -67,6 +61,49 @@ const AdminDashboard = ({ user, onLogout }) => {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="dashboard-grid-secondary" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+          <div className="analytics-card glass" style={{ padding: '2rem' }}>
+            <h3 style={{ fontSize: '0.9rem', letterSpacing: '2px', marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>TOP SELLING PRODUCTS</h3>
+            <div className="top-products-list" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {stats.top_products.map((p, i) => (
+                <div key={i} className="top-product-item">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                    <span>{p.name}</span>
+                    <strong>{p.total_sold} units</strong>
+                  </div>
+                  <div className="progress-bar-bg" style={{ height: '6px', background: '#f0f0f0', borderRadius: '10px', overflow: 'hidden' }}>
+                    <div className="progress-bar-fill" style={{ 
+                      height: '100%', 
+                      background: 'var(--accent-gold)', 
+                      width: `${(p.total_sold / Math.max(...stats.top_products.map(x => x.total_sold))) * 100}%`,
+                      transition: 'width 1s ease-out'
+                    }}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="analytics-card glass" style={{ padding: '2rem' }}>
+            <h3 style={{ fontSize: '0.9rem', letterSpacing: '2px', marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>WEEKLY REVENUE</h3>
+            <div className="daily-stats-chart" style={{ height: '150px', display: 'flex', alignItems: 'flex-end', gap: '10px' }}>
+              {stats.daily_stats.map((d, i) => (
+                <div key={i} className="chart-bar-wrapper" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                  <div className="chart-bar" style={{ 
+                    width: '100%', 
+                    background: '#111', 
+                    borderRadius: '4px 4px 0 0',
+                    height: `${(d.revenue / (Math.max(...stats.daily_stats.map(x => x.revenue)) || 1)) * 100}%`,
+                    minHeight: '2px',
+                    transition: 'height 1s ease-out'
+                  }} title={formatPrice(d.revenue)}></div>
+                  <span style={{ fontSize: '0.6rem', opacity: 0.5 }}>{new Date(d.date).toLocaleDateString([], { weekday: 'short' })}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="quick-actions-row">
